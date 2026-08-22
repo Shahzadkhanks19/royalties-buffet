@@ -10,11 +10,11 @@ import ComingSoonPage from "./pages/ComingSoonPage";
 import FranchisePage from "./pages/FranchisePage";
 import GalleryPage from "./pages/GalleryPage";
 import HomePage from "./pages/HomePage";
+import LocationsPage from "./pages/LocationsPage";
 import MenuPage from "./pages/MenuPage";
 import ReservationPage from "./pages/ReservationPage";
 
 const routedPlaceholders = [
-  "/locations",
   "/contact",
   "/privacy",
   "/terms",
@@ -36,6 +36,7 @@ export default function App() {
           <Route path="/catering" element={<CateringPage />} />
           <Route path="/franchise" element={<FranchisePage />} />
           <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/locations" element={<LocationsPage />} />
           {routedPlaceholders.map((path) => (
             <Route key={path} path={path} element={<ComingSoonPage />} />
           ))}
