@@ -7,12 +7,12 @@ import useScrollPosition from "./hooks/useScrollPosition";
 import AboutPage from "./pages/AboutPage";
 import CateringPage from "./pages/CateringPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
+import FranchisePage from "./pages/FranchisePage";
 import HomePage from "./pages/HomePage";
 import MenuPage from "./pages/MenuPage";
 import ReservationPage from "./pages/ReservationPage";
 
 const routedPlaceholders = [
-  "/franchise",
   "/gallery",
   "/locations",
   "/contact",
@@ -34,6 +34,7 @@ export default function App() {
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/reservation" element={<ReservationPage />} />
           <Route path="/catering" element={<CateringPage />} />
+          <Route path="/franchise" element={<FranchisePage />} />
           {routedPlaceholders.map((path) => (
             <Route key={path} path={path} element={<ComingSoonPage />} />
           ))}
