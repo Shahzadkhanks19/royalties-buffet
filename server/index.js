@@ -2,6 +2,7 @@ import express from "express";
 import { connectDatabase, databaseReady } from "./config/database.js";
 import { assertProductionEnv, env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/errors.js";
+import adminRoutes from "./routes/admin.js";
 import publicRoutes from "./routes/public.js";
 import { seedCmsContent } from "./services/seedCms.js";
 
@@ -15,6 +16,7 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (origin && origin === env.clientOrigin) {
     res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
@@ -22,6 +24,7 @@ app.use((req, res, next) => {
 
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("X-Frame-Options", "DENY");
 
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
@@ -37,6 +40,7 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+app.use("/api/admin", adminRoutes);
 app.use("/api", publicRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
