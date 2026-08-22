@@ -1,7 +1,9 @@
 import { Building2, Check, ChefHat, Crown, HeartHandshake, MapPin, PartyPopper, Sparkles, Users } from "lucide-react";
 import { useState } from "react";
 import CustomSelect from "../components/ui/CustomSelect";
+import SafeImage from "../components/ui/SafeImage";
 import { buttonGold, internalHero, internalHeroInner, shell } from "../config/site";
+import { fieldClass, textareaClass, validateCommonLeadFields } from "../utils/validation";
 
 const eventTypes = [
   [PartyPopper, "Weddings & Celebrations", "Buffet-led experiences for weddings, engagements, anniversaries, birthdays and milestone occasions."],
@@ -23,21 +25,34 @@ const guestOptions = ["Up to 50 Guests", "50-100 Guests", "100-250 Guests", "250
 const areaOptions = ["Gurugram", "Delhi", "Noida", "Greater Noida", "Faridabad", "Ghaziabad", "Other Delhi NCR"];
 const serviceOptions = ["Grand Buffet", "Live Counters + Buffet", "Corporate Catering", "Custom Catering Plan"];
 
+function ErrorText({ message }) {
+  return message ? <span className="mt-2 block text-xs font-semibold text-red-300">{message}</span> : null;
+}
+
 export default function CateringPage() {
   const [form, setForm] = useState({ event: "Wedding", guests: "100-250 Guests", area: "Gurugram", service: "Grand Buffet", name: "", phone: "", email: "", venue: "", notes: "" });
+  const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+
+  const update = (key, value) => {
+    setForm((current) => ({ ...current, [key]: value }));
+    setErrors((current) => ({ ...current, [key]: undefined }));
+    setSubmitted(false);
+  };
 
   const submit = (event) => {
     event.preventDefault();
-    if (!form.name.trim() || !form.phone.trim()) return;
+    const nextErrors = validateCommonLeadFields({ name: form.name, phone: form.phone, email: form.email });
+    if (form.venue.trim().length < 2) nextErrors.venue = "Please enter a venue or locality.";
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) return;
     setSubmitted(true);
   };
 
   return (
     <>
       <section className={internalHero}>
-        <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=2200&q=90" alt="Premium catered celebration" className="absolute inset-0 h-full w-full object-cover" />
+        <SafeImage src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=2200&q=90" alt="Premium catered celebration" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,3,3,.96)_0%,rgba(3,3,3,.82)_44%,rgba(3,3,3,.28)_100%)]" />
         <div className={internalHeroInner}>
           <div className="max-w-3xl">
@@ -73,8 +88,8 @@ export default function CateringPage() {
                 {formats.map((item) => <div key={item.title} className="border border-black/10 bg-[#fffaf2] p-5 transition hover:-translate-y-1 hover:border-[#bd8e37]/45 hover:shadow-lg"><Check className="size-5 text-[#a97928]" /><h3 className="mt-4 font-serif text-2xl text-[#17130e]">{item.title}</h3><p className="mt-2 text-sm leading-7 text-[#716758]">{item.copy}</p></div>)}
               </div>
             </div>
-            <div className="relative min-h-[620px] overflow-hidden bg-black">
-              <img src="https://images.unsplash.com/photo-1507504031003-b417219a0fde?auto=format&fit=crop&w=1500&q=90" alt="Catering buffet and event service" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="relative min-h-[480px] overflow-hidden bg-black sm:min-h-[560px] lg:min-h-[620px]">
+              <SafeImage src="https://images.unsplash.com/photo-1507504031003-b417219a0fde?auto=format&fit=crop&w=1500&q=90" alt="Catering buffet and event service" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/8 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-7 sm:p-9"><ChefHat className="size-7 text-[#d8ab4d]" /><p className="mt-5 max-w-md font-serif text-3xl leading-tight text-white">Food, service and presentation planned as one experience.</p></div>
             </div>
@@ -103,7 +118,7 @@ export default function CateringPage() {
             </div>
           </div>
 
-          <form onSubmit={submit} className="bg-[#0d0d0d] p-6 text-white sm:p-8 lg:p-10">
+          <form onSubmit={submit} noValidate className="bg-[#0d0d0d] p-6 text-white sm:p-8 lg:p-10">
             <div><p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[#d8ab4d]">Catering enquiry</p><h2 className="mt-2 font-serif text-3xl sm:text-4xl">Start your event brief</h2></div>
             <div className="mt-7 grid gap-5 md:grid-cols-2">
               <CustomSelect label="Event Type" value={form.event} options={eventOptions} icon={PartyPopper} onChange={(value) => update("event", value)} />
@@ -112,14 +127,14 @@ export default function CateringPage() {
               <CustomSelect label="Service Format" value={form.service} options={serviceOptions} icon={ChefHat} onChange={(value) => update("service", value)} />
             </div>
             <div className="mt-6 grid gap-5 md:grid-cols-2">
-              <label><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Name</span><input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Your name" className="min-h-12 w-full border border-[#d8ab4d]/28 bg-black/55 px-4 text-sm text-white outline-none transition placeholder:text-white/28 focus:border-[#d8ab4d]/65" /></label>
-              <label><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Phone</span><input value={form.phone} onChange={(e) => update("phone", e.target.value)} inputMode="numeric" placeholder="10-digit mobile number" className="min-h-12 w-full border border-[#d8ab4d]/28 bg-black/55 px-4 text-sm text-white outline-none transition placeholder:text-white/28 focus:border-[#d8ab4d]/65" /></label>
-              <label><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Email</span><input value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@example.com" className="min-h-12 w-full border border-[#d8ab4d]/28 bg-black/55 px-4 text-sm text-white outline-none transition placeholder:text-white/28 focus:border-[#d8ab4d]/65" /></label>
-              <label><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Venue / Locality</span><input value={form.venue} onChange={(e) => update("venue", e.target.value)} placeholder="Venue or locality" className="min-h-12 w-full border border-[#d8ab4d]/28 bg-black/55 px-4 text-sm text-white outline-none transition placeholder:text-white/28 focus:border-[#d8ab4d]/65" /></label>
-              <label className="md:col-span-2"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Event Details</span><textarea rows={5} value={form.notes} onChange={(e) => update("notes", e.target.value)} placeholder="Event date, cuisine preferences, live counters, special requirements..." className="w-full resize-none border border-[#d8ab4d]/28 bg-black/55 px-4 py-3 text-sm leading-7 text-white outline-none transition placeholder:text-white/28 focus:border-[#d8ab4d]/65" /></label>
+              <label><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Name</span><input value={form.name} onChange={(e) => update("name", e.target.value)} aria-invalid={Boolean(errors.name)} placeholder="Your name" autoComplete="name" className={fieldClass(errors.name)} /><ErrorText message={errors.name} /></label>
+              <label><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Phone</span><input value={form.phone} onChange={(e) => update("phone", e.target.value.replace(/\D/g, "").slice(0, 10))} aria-invalid={Boolean(errors.phone)} inputMode="numeric" autoComplete="tel" placeholder="10-digit mobile number" className={fieldClass(errors.phone)} /><ErrorText message={errors.phone} /></label>
+              <label><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Email</span><input value={form.email} onChange={(e) => update("email", e.target.value)} aria-invalid={Boolean(errors.email)} inputMode="email" autoComplete="email" placeholder="you@example.com" className={fieldClass(errors.email)} /><ErrorText message={errors.email} /></label>
+              <label><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Venue / Locality</span><input value={form.venue} onChange={(e) => update("venue", e.target.value)} aria-invalid={Boolean(errors.venue)} placeholder="Venue or locality" className={fieldClass(errors.venue)} /><ErrorText message={errors.venue} /></label>
+              <label className="md:col-span-2"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Event Details</span><textarea rows={5} value={form.notes} onChange={(e) => update("notes", e.target.value)} placeholder="Event date, cuisine preferences, live counters, special requirements..." className={textareaClass(false)} /></label>
             </div>
-            <button type="submit" className={`${buttonGold} mt-7`}>Send Catering Enquiry</button>
-            {submitted ? <div className="mt-6 flex items-start gap-3 border border-[#d8ab4d]/25 bg-[#d8ab4d]/8 p-4"><Check className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><p className="text-sm leading-6 text-white/70">Your catering enquiry has been captured in the current frontend flow. Backend lead creation will be connected later.</p></div> : null}
+            <button type="submit" className={`${buttonGold} mt-7 w-full sm:w-auto`}>Send Catering Enquiry</button>
+            {submitted ? <div className="mt-6 flex items-start gap-3 border border-[#d8ab4d]/25 bg-[#d8ab4d]/8 p-4" role="status"><Check className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><p className="text-sm leading-6 text-white/70">Catering details validated successfully and are ready for backend lead creation.</p></div> : null}
           </form>
         </div>
       </section>
