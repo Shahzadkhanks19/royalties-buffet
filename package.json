@@ -7,12 +7,11 @@
   "scripts": {
     "dev": "vite",
     "dev:server": "node --watch server/index.js",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "server": "node server/index.js",
     "lint": "eslint .",
-    "type-check": "tsc -b --pretty false",
-    "check": "npm run lint && npm run type-check && npm run build"
+    "check": "npm run lint && npm run build"
   },
   "dependencies": {
     "express": "5.2.1",
@@ -22,17 +21,12 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
-    "@types/node": "latest",
-    "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
     "@vitejs/plugin-react": "6.1.0",
     "eslint": "latest",
     "eslint-plugin-react-hooks": "latest",
     "eslint-plugin-react-refresh": "latest",
     "globals": "latest",
     "tailwindcss": "4.3.3",
-    "typescript": "7.0.2",
-    "typescript-eslint": "latest",
     "vite": "8.2.2"
   }
 }
