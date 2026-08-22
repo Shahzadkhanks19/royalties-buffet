@@ -12,6 +12,8 @@ const franchiseLeadSchema = new mongoose.Schema(
     company: { type: String, trim: true, maxlength: 160, default: "" },
     message: { type: String, trim: true, maxlength: 2500, default: "" },
     status: { type: String, enum: ["new", "contacted", "qualified", "discussion", "approved", "rejected"], default: "new", index: true },
+    adminNotes: { type: String, trim: true, maxlength: 3000, default: "" },
+    isArchived: { type: Boolean, default: false, index: true },
     source: { type: String, default: "website" },
   },
   { timestamps: true },
