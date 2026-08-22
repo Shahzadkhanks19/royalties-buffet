@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import CustomSelect from "../components/ui/CustomSelect";
 import SafeImage from "../components/ui/SafeImage";
 import { buttonGold, internalHero, internalHeroInner, shell } from "../config/site";
+import useApiSubmission from "../hooks/useApiSubmission";
 import { fieldClass, textareaClass, validateCommonLeadFields } from "../utils/validation";
 
 const outlets = ["Royalties Buffet - Gurugram", "Royalties Buffet - Delhi", "Royalties Buffet - Noida"];
@@ -22,28 +23,46 @@ const dates = Array.from({ length: 7 }, (_, index) => {
   };
 });
 
+const createInitialForm = () => ({
+  outlet: outlets[0],
+  guestCount: "4 Guests",
+  occasion: "Casual Dining",
+  preference: "No Preference",
+  date: dates[0].value,
+  time: "8:00 PM",
+  name: "",
+  phone: "",
+  email: "",
+  requests: "",
+});
+
 function ErrorText({ message }) {
   return message ? <span className="mt-2 block text-xs font-semibold text-red-300">{message}</span> : null;
 }
 
 export default function ReservationPage() {
-  const [form, setForm] = useState({ outlet: outlets[0], guestCount: "4 Guests", occasion: "Casual Dining", preference: "No Preference", date: dates[0].value, time: "8:00 PM", name: "", phone: "", email: "", requests: "" });
+  const [form, setForm] = useState(createInitialForm);
   const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
+  const { submitting, serverError, successMessage, submit, clearSubmissionState } = useApiSubmission();
 
   const selectedDate = useMemo(() => dates.find((date) => date.value === form.date), [form.date]);
   const update = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }));
     setErrors((current) => ({ ...current, [key]: undefined }));
-    setSubmitted(false);
+    clearSubmissionState();
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const nextErrors = validateCommonLeadFields({ name: form.name, phone: form.phone, email: form.email });
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
-    setSubmitted(true);
+
+    const result = await submit("/api/reservations", form);
+    if (result) {
+      setForm(createInitialForm());
+      setErrors({});
+    }
   };
 
   return (
@@ -59,19 +78,13 @@ export default function ReservationPage() {
           <form onSubmit={handleSubmit} noValidate className="border border-white/10 bg-[#0d0d0d] p-5 sm:p-7 lg:p-9">
             <div className="flex items-center justify-between gap-6 border-b border-white/10 pb-6"><div><p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[#d8ab4d]">Book your table</p><h2 className="mt-2 font-serif text-3xl sm:text-4xl">Choose the details</h2></div><CalendarDays className="size-8 shrink-0 text-[#d8ab4d]" strokeWidth={1.5} /></div>
 
-            <div className="mt-7 grid gap-5 md:grid-cols-2">
-              <CustomSelect label="Outlet" value={form.outlet} options={outlets} icon={MapPin} onChange={(value) => update("outlet", value)} />
-              <CustomSelect label="Guests" value={form.guestCount} options={guests} icon={Users} onChange={(value) => update("guestCount", value)} />
-            </div>
+            <div className="mt-7 grid gap-5 md:grid-cols-2"><CustomSelect label="Outlet" value={form.outlet} options={outlets} icon={MapPin} onChange={(value) => update("outlet", value)} /><CustomSelect label="Guests" value={form.guestCount} options={guests} icon={Users} onChange={(value) => update("guestCount", value)} /></div>
 
             <div className="mt-7"><span className="mb-3 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Select date</span><div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-4 sm:grid-cols-7">{dates.map((date) => { const active = form.date === date.value; return <button key={date.value} type="button" aria-pressed={active} onClick={() => update("date", date.value)} className={`min-h-24 border px-2 py-3 text-center transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8ab4d] ${active ? "border-[#d8ab4d] bg-[#d8ab4d] text-black" : "border-white/10 bg-white/[0.02] text-white hover:border-[#d8ab4d]/45 hover:bg-[#d8ab4d]/5"}`}><span className="block text-[0.56rem] font-black uppercase tracking-[0.12em] opacity-60">{date.day}</span><strong className="mt-1 block font-serif text-2xl">{date.number}</strong><span className="text-[0.58rem] uppercase tracking-[0.1em] opacity-60">{date.month}</span></button>; })}</div></div>
 
             <div className="mt-7"><span className="mb-3 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Select time</span><div className="grid grid-cols-2 gap-2 sm:grid-cols-5">{times.map((time) => { const active = form.time === time; return <button key={time} type="button" aria-pressed={active} onClick={() => update("time", time)} className={`min-h-12 border px-3 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8ab4d] ${active ? "border-[#d8ab4d] bg-[#d8ab4d]/12 text-[#efc86f]" : "border-white/10 bg-white/[0.02] text-white/66 hover:border-[#d8ab4d]/40 hover:text-white"}`}>{time}</button>; })}</div></div>
 
-            <div className="mt-7 grid gap-5 md:grid-cols-2">
-              <CustomSelect label="Occasion" value={form.occasion} options={occasions} icon={PartyPopper} onChange={(value) => update("occasion", value)} />
-              <CustomSelect label="Dining Preference" value={form.preference} options={preferences} icon={Check} onChange={(value) => update("preference", value)} />
-            </div>
+            <div className="mt-7 grid gap-5 md:grid-cols-2"><CustomSelect label="Occasion" value={form.occasion} options={occasions} icon={PartyPopper} onChange={(value) => update("occasion", value)} /><CustomSelect label="Dining Preference" value={form.preference} options={preferences} icon={Check} onChange={(value) => update("preference", value)} /></div>
 
             <div className="mt-7 grid gap-5 md:grid-cols-2">
               <label className="block"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Name</span><input value={form.name} onChange={(event) => update("name", event.target.value)} aria-invalid={Boolean(errors.name)} placeholder="Your name" autoComplete="name" className={fieldClass(errors.name)} /><ErrorText message={errors.name} /></label>
@@ -80,25 +93,12 @@ export default function ReservationPage() {
               <label className="block md:col-span-2"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Special requests</span><textarea value={form.requests} onChange={(event) => update("requests", event.target.value)} placeholder="High chair, celebration note, accessibility needs, seating preference..." rows={4} className={textareaClass(false)} /></label>
             </div>
 
-            <button type="submit" className={`${buttonGold} mt-7 w-full sm:w-auto`}>Confirm Reservation Request</button>
-            {submitted ? <div className="mt-6 flex items-start gap-3 border border-[#d8ab4d]/30 bg-[#d8ab4d]/8 p-4" role="status"><Check className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><p className="text-sm leading-6 text-white/72">Reservation details validated successfully and are ready to connect to availability and booking APIs.</p></div> : null}
+            <button type="submit" disabled={submitting} className={`${buttonGold} mt-7 w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}>{submitting ? "Submitting..." : "Confirm Reservation Request"}</button>
+            {serverError ? <div className="mt-6 border border-red-400/25 bg-red-400/8 p-4 text-sm text-red-200" role="alert">{serverError}</div> : null}
+            {successMessage ? <div className="mt-6 flex items-start gap-3 border border-[#d8ab4d]/30 bg-[#d8ab4d]/8 p-4" role="status"><Check className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><p className="text-sm leading-6 text-white/72">{successMessage}</p></div> : null}
           </form>
 
-          <aside className="space-y-5">
-            <div className="xl:sticky xl:top-32 border border-[#d8ab4d]/25 bg-[#15120c] p-6 sm:p-7">
-              <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[#d8ab4d]">Booking summary</p>
-              <h2 className="mt-3 font-serif text-3xl">Your Royalties table</h2>
-              <div className="mt-7 space-y-4 border-y border-white/10 py-6 text-sm">
-                <div className="flex items-start gap-3"><MapPin className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.outlet}</span></div>
-                <div className="flex items-start gap-3"><CalendarDays className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{selectedDate ? `${selectedDate.day}, ${selectedDate.number} ${selectedDate.month}` : "Select a date"}</span></div>
-                <div className="flex items-start gap-3"><Clock3 className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.time}</span></div>
-                <div className="flex items-start gap-3"><Users className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.guestCount}</span></div>
-                <div className="flex items-start gap-3"><PartyPopper className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.occasion}</span></div>
-              </div>
-              <p className="mt-5 text-xs leading-6 text-white/38">This is currently a front-end reservation request flow. Availability confirmation, slot locking and admin management will connect when the backend reservation module is built.</p>
-              <div className="mt-6 flex items-center gap-3 border border-white/10 bg-black/20 p-4"><Phone className="size-4 text-[#d8ab4d]" /><div><p className="text-[0.56rem] font-black uppercase tracking-[0.12em] text-white/38">Need help?</p><p className="mt-1 text-sm text-white/72">Contact the restaurant team</p></div></div>
-            </div>
-          </aside>
+          <aside className="space-y-5"><div className="border border-[#d8ab4d]/25 bg-[#15120c] p-6 sm:p-7 xl:sticky xl:top-32"><p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[#d8ab4d]">Booking summary</p><h2 className="mt-3 font-serif text-3xl">Your Royalties table</h2><div className="mt-7 space-y-4 border-y border-white/10 py-6 text-sm"><div className="flex items-start gap-3"><MapPin className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.outlet}</span></div><div className="flex items-start gap-3"><CalendarDays className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{selectedDate ? `${selectedDate.day}, ${selectedDate.number} ${selectedDate.month}` : "Select a date"}</span></div><div className="flex items-start gap-3"><Clock3 className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.time}</span></div><div className="flex items-start gap-3"><Users className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.guestCount}</span></div><div className="flex items-start gap-3"><PartyPopper className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.occasion}</span></div></div><p className="mt-5 text-xs leading-6 text-white/38">Reservation requests are now stored in the backend. Real-time slot locking and confirmation workflow can be layered on top when the admin reservation module is built.</p><div className="mt-6 flex items-center gap-3 border border-white/10 bg-black/20 p-4"><Phone className="size-4 text-[#d8ab4d]" /><div><p className="text-[0.56rem] font-black uppercase tracking-[0.12em] text-white/38">Need help?</p><p className="mt-1 text-sm text-white/72">Contact the restaurant team</p></div></div></div></aside>
         </div>
       </section>
     </>
