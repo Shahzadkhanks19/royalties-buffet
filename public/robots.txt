@@ -1,4 +1,4 @@
 User-agent: *
-Allow: /
+Disallow: /
 
-Sitemap: https://royalties-buffet-client.vercel.app/sitemap.xml
+# Set VITE_SITE_URL to the final production domain before deployment.
