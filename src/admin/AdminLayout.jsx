@@ -1,4 +1,4 @@
-import { CalendarDays, Handshake, Images, LayoutDashboard, LogOut, Mail, Soup, UtensilsCrossed, X } from "lucide-react";
+import { CalendarDays, Handshake, Images, LayoutDashboard, LogOut, Mail, MapPin, Settings, Soup, UtensilsCrossed, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "./AdminAuthContext";
@@ -11,6 +11,8 @@ const nav = [
   [Handshake, "Franchise Leads", "/admin/franchise"],
   [Soup, "Menu Manager", "/admin/menu"],
   [Images, "Gallery Manager", "/admin/gallery"],
+  [MapPin, "Locations", "/admin/locations"],
+  [Settings, "Site Settings", "/admin/settings"],
 ];
 
 export default function AdminLayout() {
