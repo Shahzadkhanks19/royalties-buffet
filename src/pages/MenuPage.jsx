@@ -2,61 +2,9 @@ import { useMemo, useState } from "react";
 import { CakeSlice, ChefHat, Flame, Soup } from "lucide-react";
 import { Link } from "react-router-dom";
 import { buttonGold, buttonLightOutline, internalHero, internalHeroInner, shell } from "../config/site";
+import { menuImageFallback, menuItems } from "../data/menuItems";
 
 const categories = ["All", "Live Grill", "Starters", "Indian", "Italian", "Indo-Chinese", "Mexican", "Global", "Desserts", "Beverages"];
-
-const menuItems = [
-  { title: "Smoky Paneer Tikka", category: "Live Grill", type: "veg", copy: "Charred paneer, peppers and aromatic Indian spices finished hot from the grill." },
-  { title: "Tandoori Chicken", category: "Live Grill", type: "non-veg", protein: "Chicken", copy: "Yoghurt-marinated chicken roasted with bold tandoor spices and smoke." },
-  { title: "Malai Chicken Tikka", category: "Live Grill", type: "non-veg", protein: "Chicken", copy: "Creamy, mildly spiced chicken tikka with a smoky char from the grill." },
-  { title: "Tandoori Mushroom", category: "Live Grill", type: "veg", copy: "Juicy mushrooms marinated with yoghurt and spices, roasted until smoky." },
-  { title: "Grilled Fish Tikka", category: "Live Grill", type: "non-veg", protein: "Seafood", copy: "Spiced fish pieces grilled with citrus, herbs and a gentle tandoori finish." },
-  { title: "Crispy Corn & Chilli", category: "Starters", type: "veg", copy: "Crunchy corn tossed with chilli, herbs and savoury house seasoning." },
-  { title: "Hara Bhara Kebab", category: "Starters", type: "veg", copy: "Spinach, peas and potato patties seasoned with familiar Indian spices." },
-  { title: "Dahi Ke Kebab", category: "Starters", type: "veg", copy: "Crisp outside, creamy hung-curd centre with gentle herbs and spices." },
-  { title: "Chicken 65", category: "Starters", type: "non-veg", protein: "Chicken", copy: "South Indian-style spicy fried chicken with curry leaves and chilli." },
-  { title: "Chilli Chicken", category: "Starters", type: "non-veg", protein: "Chicken", copy: "Crisp chicken tossed with peppers, onion and a punchy Indo-Chinese sauce." },
-  { title: "Crispy Fried Prawns", category: "Starters", type: "non-veg", protein: "Seafood", copy: "Golden fried prawns served crisp with a bright, savoury seasoning." },
-  { title: "Dal Makhani", category: "Indian", type: "veg", copy: "Slow-cooked black lentils enriched with butter, tomato and warming spices." },
-  { title: "Paneer Butter Masala", category: "Indian", type: "veg", copy: "Paneer in a rich tomato-butter gravy, a buffet favourite across India." },
-  { title: "Kadai Paneer", category: "Indian", type: "veg", copy: "Paneer, peppers and onion tossed in a robust kadai masala gravy." },
-  { title: "Chole Masala", category: "Indian", type: "veg", copy: "North Indian chickpeas simmered with tomato, onion and fragrant spices." },
-  { title: "Veg Biryani", category: "Indian", type: "veg", copy: "Fragrant basmati rice layered with vegetables, herbs and aromatic spices." },
-  { title: "Butter Chicken", category: "Indian", type: "non-veg", protein: "Chicken", copy: "Tandoori chicken folded into a silky tomato, butter and cream gravy." },
-  { title: "Chicken Biryani", category: "Indian", type: "non-veg", protein: "Chicken", copy: "Basmati rice layered with spiced chicken, herbs and aromatic whole spices." },
-  { title: "Mutton Rogan Josh", category: "Indian", type: "non-veg", protein: "Mutton", copy: "Tender mutton slow-cooked in a deeply aromatic Kashmiri-inspired gravy." },
-  { title: "Egg Curry", category: "Indian", type: "non-veg", protein: "Egg", copy: "Boiled eggs simmered in a homestyle onion-tomato masala gravy." },
-  { title: "Fish Curry", category: "Indian", type: "non-veg", protein: "Seafood", copy: "Fish cooked in a fragrant Indian curry with spice, tang and fresh herbs." },
-  { title: "Margherita Pizza", category: "Italian", type: "veg", copy: "Classic tomato, mozzarella and basil pizza baked until bubbling and crisp." },
-  { title: "Farmhouse Pizza", category: "Italian", type: "veg", copy: "A familiar Indian pizzeria favourite loaded with peppers, onion and vegetables." },
-  { title: "Penne Arrabbiata", category: "Italian", type: "veg", copy: "Penne tossed in a lively tomato, garlic, herb and chilli sauce." },
-  { title: "Creamy Alfredo Pasta", category: "Italian", type: "veg", copy: "Creamy white-sauce pasta with herbs, vegetables and parmesan-style richness." },
-  { title: "Chicken Arrabbiata Pasta", category: "Italian", type: "non-veg", protein: "Chicken", copy: "Pasta with chicken in a spicy tomato, garlic and herb sauce." },
-  { title: "Veg Hakka Noodles", category: "Indo-Chinese", type: "veg", copy: "Wok-tossed noodles with vegetables, spring onion and classic sauces." },
-  { title: "Veg Manchurian", category: "Indo-Chinese", type: "veg", copy: "Crisp vegetable dumplings tossed in a savoury garlic-chilli Manchurian sauce." },
-  { title: "Chilli Paneer", category: "Indo-Chinese", type: "veg", copy: "Paneer tossed with peppers, onion, chilli and soy in an Indian-Chinese classic." },
-  { title: "Schezwan Fried Rice", category: "Indo-Chinese", type: "veg", copy: "Wok-fried rice with vegetables and a bold Schezwan chilli-garlic kick." },
-  { title: "Chicken Hakka Noodles", category: "Indo-Chinese", type: "non-veg", protein: "Chicken", copy: "Wok-tossed noodles with chicken, vegetables and savoury sauces." },
-  { title: "Egg Fried Rice", category: "Indo-Chinese", type: "non-veg", protein: "Egg", copy: "Classic wok-fried rice with egg, vegetables, spring onion and light soy." },
-  { title: "Loaded Veg Nachos", category: "Mexican", type: "veg", copy: "Crisp nachos layered with beans, salsa, cheese, jalapeños and fresh toppings." },
-  { title: "Mexican Bean Tacos", category: "Mexican", type: "veg", copy: "Soft or crisp tacos filled with seasoned beans, salsa and crunchy vegetables." },
-  { title: "Veg Quesadilla", category: "Mexican", type: "veg", copy: "Toasted tortilla packed with cheese, peppers, corn and Mexican-style seasoning." },
-  { title: "Chicken Tacos", category: "Mexican", type: "non-veg", protein: "Chicken", copy: "Seasoned chicken, salsa, vegetables and creamy dressing in warm tortillas." },
-  { title: "Thai Green Curry", category: "Global", type: "veg", copy: "Aromatic coconut curry with vegetables, basil and fragrant Thai-style seasoning." },
-  { title: "Vegetable Au Gratin", category: "Global", type: "veg", copy: "Baked vegetables in a creamy sauce beneath a golden cheesy crust." },
-  { title: "Herbed Grilled Vegetables", category: "Global", type: "veg", copy: "Seasonal vegetables grilled with herbs, olive oil and light seasoning." },
-  { title: "Grilled Lemon Chicken", category: "Global", type: "non-veg", protein: "Chicken", copy: "Juicy grilled chicken with lemon, herbs and a light pepper finish." },
-  { title: "Garlic Butter Fish", category: "Global", type: "non-veg", protein: "Seafood", copy: "Pan-finished fish with garlic, butter, herbs and fresh citrus notes." },
-  { title: "Gulab Jamun", category: "Desserts", type: "veg", copy: "Warm, soft milk-solid dumplings soaked in fragrant sugar syrup." },
-  { title: "Jalebi with Rabri", category: "Desserts", type: "veg", copy: "Crisp syrupy jalebi paired with rich, chilled rabri." },
-  { title: "Brownie & Ice Cream", category: "Desserts", type: "veg", copy: "Warm chocolate brownie paired with cold vanilla ice cream." },
-  { title: "Pastry & Mousse Selection", category: "Desserts", type: "veg", copy: "A rotating assortment of cakes, pastries, mousse and chilled sweet bites." },
-  { title: "Kulfi Selection", category: "Desserts", type: "veg", copy: "Classic Indian frozen dessert in rotating familiar flavours." },
-  { title: "Fresh Lime Soda", category: "Beverages", type: "veg", copy: "Fresh lime served sweet, salted or balanced to taste." },
-  { title: "Virgin Mojito", category: "Beverages", type: "veg", copy: "Mint, lime and fizz combined into a bright, refreshing cooler." },
-  { title: "Mango Cooler", category: "Beverages", type: "veg", copy: "A chilled tropical mango cooler made for the Indian summer table." },
-  { title: "Masala Chaas", category: "Beverages", type: "veg", copy: "Cooling spiced buttermilk with roasted cumin and fresh herbs." },
-];
 
 const experience = [
   [Flame, "Live Grill", "Fresh off the flame, served sizzling and replenished throughout the experience."],
@@ -65,18 +13,32 @@ const experience = [
   [CakeSlice, "Dessert Finale", "A generous ending with Indian sweets, cakes, chilled desserts and celebration favourites."],
 ];
 
-const dishPhotoUrl = (title, index) => {
-  const keywords = encodeURIComponent(`${title} food dish`);
-  return `https://loremflickr.com/1200/900/${keywords}?lock=${index + 101}`;
-};
-
 function FoodType({ type, protein }) {
   const veg = type === "veg";
   return (
     <span className={`inline-flex items-center gap-1.5 text-[0.58rem] font-black uppercase tracking-[0.12em] ${veg ? "text-emerald-700" : "text-red-700"}`}>
-      <span className={`grid size-4 place-items-center border ${veg ? "border-emerald-700" : "border-red-700"}`}><span className={`size-1.5 rounded-full ${veg ? "bg-emerald-700" : "bg-red-700"}`} /></span>
+      <span className={`grid size-4 place-items-center border ${veg ? "border-emerald-700" : "border-red-700"}`}>
+        <span className={`size-1.5 rounded-full ${veg ? "bg-emerald-700" : "bg-red-700"}`} />
+      </span>
       {veg ? "Veg" : `Non-Veg · ${protein}`}
     </span>
+  );
+}
+
+function MenuImage({ item }) {
+  const handleError = (event) => {
+    const image = event.currentTarget;
+    if (image.src !== menuImageFallback) image.src = menuImageFallback;
+  };
+
+  return (
+    <img
+      src={item.image}
+      alt={item.title}
+      loading="lazy"
+      onError={handleError}
+      className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+    />
   );
 }
 
@@ -137,23 +99,20 @@ export default function MenuPage() {
           </div>
 
           <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {filteredItems.map((item) => {
-              const originalIndex = menuItems.findIndex((menuItem) => menuItem.title === item.title);
-              return (
-                <article key={item.title} className="group overflow-hidden border border-black/10 bg-[#fffaf2] shadow-[0_14px_35px_rgba(36,24,10,.08)] transition duration-500 hover:-translate-y-2 hover:border-[#c9983d]/55 hover:shadow-[0_24px_55px_rgba(36,24,10,.15)]">
-                  <div className="relative h-56 overflow-hidden">
-                    <img src={dishPhotoUrl(item.title, originalIndex)} alt={item.title} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-                    <span className="absolute bottom-4 left-4 bg-black/75 px-3 py-1.5 text-[0.58rem] font-black uppercase tracking-[0.12em] text-[#efcb73] backdrop-blur">{item.category}</span>
-                  </div>
-                  <div className="p-5">
-                    <FoodType type={item.type} protein={item.protein} />
-                    <h3 className="mt-4 font-serif text-2xl text-[#1b1711]">{item.title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-[#706658]">{item.copy}</p>
-                  </div>
-                </article>
-              );
-            })}
+            {filteredItems.map((item) => (
+              <article key={item.title} className="group overflow-hidden border border-black/10 bg-[#fffaf2] shadow-[0_14px_35px_rgba(36,24,10,.08)] transition duration-500 hover:-translate-y-2 hover:border-[#c9983d]/55 hover:shadow-[0_24px_55px_rgba(36,24,10,.15)]">
+                <div className="relative h-56 overflow-hidden">
+                  <MenuImage item={item} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+                  <span className="absolute bottom-4 left-4 bg-black/75 px-3 py-1.5 text-[0.58rem] font-black uppercase tracking-[0.12em] text-[#efcb73] backdrop-blur">{item.category}</span>
+                </div>
+                <div className="p-5">
+                  <FoodType type={item.type} protein={item.protein} />
+                  <h3 className="mt-4 font-serif text-2xl text-[#1b1711]">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-[#706658]">{item.copy}</p>
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       </section>
