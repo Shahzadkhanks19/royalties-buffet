@@ -9,6 +9,7 @@ import Location from "../models/Location.js";
 import MenuItem from "../models/MenuItem.js";
 import Reservation from "../models/Reservation.js";
 import ReservationAvailability from "../models/ReservationAvailability.js";
+import { sendReservationEmailSafely } from "../services/reservationEmail.js";
 import { cleanText, oneOf, optionalEmail, requirePhone, requireText } from "../utils/validation.js";
 
 const router = Router();
@@ -68,6 +69,7 @@ router.post("/reservations", async (req, res) => {
   if (used + requestedGuests > capacity) throw new ApiError(409, "This time slot no longer has enough availability for your party.");
 
   const reservation = await Reservation.create({ outlet, guestCount, occasion: oneOf(body.occasion, reservationOccasions, "Occasion"), preference: oneOf(body.preference, reservationPreferences, "Dining preference"), date, time, name: requireText(body.name, "Name", 2, 120), phone: requirePhone(body.phone), email: optionalEmail(body.email), requests: cleanText(body.requests, 1000) });
+  await sendReservationEmailSafely("received", reservation);
   res.status(201).json({ ok: true, message: "Reservation request received.", id: reservation.id });
 });
 
