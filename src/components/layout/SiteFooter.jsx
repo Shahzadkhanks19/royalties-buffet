@@ -2,7 +2,7 @@ import { Facebook, Instagram, Youtube } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { shell } from "../../config/site";
 
-const footerLinks = [["Home", "/"], ["About Us", "/about"], ["Menu", "/menu"], ["Reservation", "/reservation"], ["Gallery", "/gallery"], ["Locations", "/locations"], ["Contact Us", "/contact"]];
+const footerLinks = [["Home", "/"], ["About Us", "/about"], ["Menu", "/menu"], ["Reservation", "/reservation"], ["Gallery", "/gallery"], ["Locations", "/locations"], ["FAQ", "/faq"], ["Contact Us", "/contact"]];
 const serviceLinks = [["Catering", "/catering"], ["Franchise", "/franchise"], ["Private Events", "/catering"], ["Bulk Bookings", "/reservation"], ["Gift Vouchers", "/contact"]];
 
 export default function SiteFooter() {
@@ -16,7 +16,7 @@ export default function SiteFooter() {
         <div><h3 className="text-xs font-black uppercase tracking-[0.14em] text-[#d8ab4d]">Contact Us</h3><div className="mt-5 space-y-4 text-sm leading-6 text-white/46"><p>Royalties Buffet<br />Delhi NCR</p><p>+91 98765 43210</p><p>info@royaltiesbuffet.com</p></div></div>
         <div><h3 className="text-xs font-black uppercase tracking-[0.14em] text-[#d8ab4d]">Opening Hours</h3><div className="mt-5 space-y-3 text-sm text-white/46"><p>Mon - Fri<br /><span className="text-white/70">12:00 PM - 11:00 PM</span></p><p>Sat - Sun<br /><span className="text-white/70">11:30 AM - 11:30 PM</span></p><p className="text-[#d8ab4d]">Open all days</p></div></div>
       </div>
-      <div className={`${shell} flex flex-col gap-3 py-5 text-[0.62rem] text-white/28 sm:flex-row sm:items-center sm:justify-between`}><span>© 2026 Royalties Buffet. All Rights Reserved.</span><div className="flex gap-5"><NavLink to="/privacy" className="transition hover:text-[#d8ab4d]">Privacy Policy</NavLink><NavLink to="/terms" className="transition hover:text-[#d8ab4d]">Terms & Conditions</NavLink></div></div>
+      <div className={`${shell} flex flex-col gap-3 py-5 text-[0.62rem] text-white/28 sm:flex-row sm:items-center sm:justify-between`}><span>© 2026 Royalties Buffet. All Rights Reserved.</span><div className="flex flex-wrap gap-5"><NavLink to="/faq" className="transition hover:text-[#d8ab4d]">FAQ</NavLink><NavLink to="/privacy" className="transition hover:text-[#d8ab4d]">Privacy Policy</NavLink><NavLink to="/terms" className="transition hover:text-[#d8ab4d]">Terms & Conditions</NavLink></div></div>
     </footer>
   );
 }
