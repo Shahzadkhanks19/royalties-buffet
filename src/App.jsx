@@ -29,14 +29,14 @@ const sectionTitleClass = "font-serif text-[clamp(2.75rem,5.3vw,5.3rem)] leading
 
 function Header() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 bg-gradient-to-b from-[#1c0a0ae8] via-[#1c0a0a75] to-transparent py-4 text-white">
+    <header className="fixed inset-x-0 top-0 z-50 bg-gradient-to-b from-[#1c0a0ae8] via-[#1c0a0a75] to-transparent py-3 text-white">
       <div className="mx-auto flex w-[min(1180px,calc(100%-2.5rem))] items-center justify-between gap-6">
-        <a className="flex items-center gap-2.5" href="#home" aria-label="Royalties Buffet home">
-          <span className="hidden text-2xl text-[#c9a45d] sm:inline" aria-hidden="true">♛</span>
-          <span className="grid leading-none">
-            <strong className="text-sm tracking-[0.14em]">ROYALTIES</strong>
-            <small className="mt-1 text-[0.52rem] tracking-[0.34em] text-[#d6c3a6]">BUFFET</small>
-          </span>
+        <a className="flex shrink-0 items-center" href="#home" aria-label="Royalties Buffet home">
+          <img
+            src="/royalties-logo.png"
+            alt="Royalties Buffet"
+            className="h-16 w-auto object-contain sm:h-20"
+          />
         </a>
 
         <nav className="hidden items-center gap-7 text-xs text-[#efe4d5] lg:flex" aria-label="Primary navigation">
@@ -56,7 +56,11 @@ function Footer() {
     <footer className="bg-[#100908] pb-7 pt-20 text-white md:pt-24">
       <div className="mx-auto grid w-[min(1180px,calc(100%-2.5rem))] gap-10 md:grid-cols-2 lg:grid-cols-[1.25fr_.55fr_.7fr] lg:gap-16">
         <div className="md:col-span-2 lg:col-span-1">
-          <p className={eyebrowClass}>Royalties Buffet</p>
+          <img
+            src="/royalties-logo.png"
+            alt="Royalties Buffet"
+            className="mb-6 h-28 w-auto object-contain"
+          />
           <h2 className="font-serif text-[clamp(2.8rem,4.8vw,4.8rem)] leading-[0.96] tracking-[-0.035em]">Come hungry.<br />Leave like royalty.</h2>
         </div>
         <div className="grid content-start gap-3 text-sm text-[#c9b9ad]">
