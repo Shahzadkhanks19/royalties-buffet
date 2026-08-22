@@ -2,8 +2,11 @@ import { lazy, Suspense } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import AdminContentManager from "./admin/AdminContentManager";
 import AdminDashboardPage from "./admin/AdminDashboardPage";
+import AdminForgotPasswordPage from "./admin/AdminForgotPasswordPage";
 import AdminLayout from "./admin/AdminLayout";
+import AdminLeadManager from "./admin/AdminLeadManager";
 import AdminLoginPage from "./admin/AdminLoginPage";
+import AdminResetPasswordPage from "./admin/AdminResetPasswordPage";
 import ProtectedAdminRoute from "./admin/ProtectedAdminRoute";
 import SiteFooter from "./components/layout/SiteFooter";
 import SiteHeader from "./components/layout/SiteHeader";
@@ -56,8 +59,14 @@ export default function App() {
             <Route path="/error" element={<ErrorPage />} />
 
             <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route path="/admin/forgot-password" element={<AdminForgotPasswordPage />} />
+            <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
             <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
               <Route index element={<AdminDashboardPage />} />
+              <Route path="reservations" element={<AdminLeadManager kind="reservations" />} />
+              <Route path="contacts" element={<AdminLeadManager kind="contacts" />} />
+              <Route path="catering" element={<AdminLeadManager kind="catering" />} />
+              <Route path="franchise" element={<AdminLeadManager kind="franchise" />} />
               <Route path="menu" element={<AdminContentManager kind="menu" />} />
               <Route path="gallery" element={<AdminContentManager kind="gallery" />} />
             </Route>
