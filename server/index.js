@@ -2,7 +2,9 @@ import express from "express";
 import { connectDatabase, databaseReady } from "./config/database.js";
 import { assertProductionEnv, env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/errors.js";
+import adminConfigRoutes from "./routes/adminConfig.js";
 import adminRoutes from "./routes/admin.js";
+import publicConfigRoutes from "./routes/publicConfig.js";
 import publicRoutes from "./routes/public.js";
 import { seedAdminAccount } from "./services/seedAdmin.js";
 import { seedCmsContent } from "./services/seedCms.js";
@@ -41,7 +43,9 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+app.use("/api/admin", adminConfigRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api", publicConfigRoutes);
 app.use("/api", publicRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
