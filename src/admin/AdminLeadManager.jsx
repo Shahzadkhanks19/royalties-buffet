@@ -1,6 +1,7 @@
 import { Archive, ArchiveRestore, Search, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { apiRequest, deleteJson, patchJson } from "../lib/api";
+import AdminSelect from "./AdminSelect";
 
 const config = {
   reservations: { title: "Reservations", subtitle: "Manage table requests and booking status." },
@@ -34,19 +35,16 @@ export default function AdminLeadManager({ kind }) {
   const [archiveFilter, setArchiveFilter] = useState("active");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const load = async () => {
-    try {
-      setError("");
-      const result = await apiRequest(`/api/admin/${kind}`);
-      setItems(result.items || []);
-      setStatuses(result.statuses || []);
-    } catch (err) {
-      setError(err.message || "Unable to load records.");
-    }
-  };
-
-  useEffect(() => { load(); }, [kind]);
+  useEffect(() => {
+    let active = true;
+    setError("");
+    apiRequest(`/api/admin/${kind}`)
+      .then((result) => { if (active) { setItems(result.items || []); setStatuses(result.statuses || []); } })
+      .catch((err) => { if (active) setError(err.message || "Unable to load records."); });
+    return () => { active = false; };
+  }, [kind]);
 
   const filtered = useMemo(() => items.filter((item) => {
     const text = JSON.stringify(item).toLowerCase();
@@ -77,6 +75,7 @@ export default function AdminLeadManager({ kind }) {
       await deleteJson(`/api/admin/${kind}/${selected._id}`);
       setItems((current) => current.filter((item) => item._id !== selected._id));
       setSelected(null);
+      setConfirmDelete(false);
     } catch (err) {
       setError(err.message || "Unable to delete record.");
     } finally {
@@ -90,10 +89,10 @@ export default function AdminLeadManager({ kind }) {
       <h1 className="mt-2 font-serif text-4xl text-[#17130e] sm:text-5xl">{meta.title}</h1>
       <p className="mt-4 max-w-2xl text-sm leading-7 text-[#6c6254]">{meta.subtitle}</p>
 
-      <div className="mt-7 grid gap-3 lg:grid-cols-[1fr_auto_auto]">
+      <div className="mt-7 grid gap-3 lg:grid-cols-[1fr_220px_180px]">
         <label className="flex min-h-11 items-center gap-3 border border-black/10 bg-[#fffaf2] px-4"><Search className="size-4 text-[#8b682b]" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, phone, email, city, date..." className="w-full bg-transparent text-sm outline-none" /></label>
-        <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="min-h-11 border border-black/10 bg-[#fffaf2] px-4 text-sm font-bold text-[#4f4538] outline-none"><option value="all">All statuses</option>{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select>
-        <select value={archiveFilter} onChange={(event) => setArchiveFilter(event.target.value)} className="min-h-11 border border-black/10 bg-[#fffaf2] px-4 text-sm font-bold text-[#4f4538] outline-none"><option value="active">Active</option><option value="archived">Archived</option><option value="all">All</option></select>
+        <AdminSelect value={statusFilter} options={["all", ...statuses]} onChange={setStatusFilter} />
+        <AdminSelect value={archiveFilter} options={["active", "archived", "all"]} onChange={setArchiveFilter} />
       </div>
 
       {error ? <div className="mt-5 border border-red-700/20 bg-red-50 p-4 text-sm text-red-800">{error}</div> : null}
@@ -110,11 +109,13 @@ export default function AdminLeadManager({ kind }) {
       {selected ? <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/70 p-4" onClick={() => setSelected(null)}><div className="mx-auto my-8 max-w-3xl bg-[#fffaf2] shadow-2xl" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-start justify-between gap-5 border-b border-black/10 p-5 sm:p-6"><div><p className="text-[0.6rem] font-black uppercase tracking-[0.15em] text-[#956c25]">Record details</p><h2 className="mt-1 font-serif text-3xl text-[#17130e]">{selected.name}</h2></div><button type="button" onClick={() => setSelected(null)} className="border border-black/10 px-3 py-2 text-xs font-black uppercase">Close</button></div>
         <div className="grid gap-4 p-5 sm:grid-cols-2 sm:p-6">{detailRows(kind, selected).map(([label, value]) => <div key={label} className={label === "Message" || label === "Requests" || label === "Event Notes" || label === "Plan" ? "sm:col-span-2" : ""}><p className="text-[0.58rem] font-black uppercase tracking-[0.12em] text-black/40">{label}</p><p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-[#4f4538]">{value}</p></div>)}</div>
-        <div className="border-t border-black/10 p-5 sm:p-6"><div className="grid gap-4 sm:grid-cols-2"><label><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.12em] text-black/40">Status</span><select value={selected.status} onChange={(event) => updateSelected({ status: event.target.value })} disabled={saving} className="min-h-11 w-full border border-black/10 bg-white px-3 text-sm font-bold outline-none">{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label><div className="flex items-end"><button type="button" disabled={saving} onClick={() => updateSelected({ isArchived: !selected.isArchived })} className="inline-flex min-h-11 w-full items-center justify-center gap-2 border border-black/10 px-4 text-xs font-black uppercase tracking-[0.1em] transition hover:bg-black/5">{selected.isArchived ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}{selected.isArchived ? "Restore" : "Archive"}</button></div></div>
+        <div className="border-t border-black/10 p-5 sm:p-6"><div className="grid gap-4 sm:grid-cols-2"><AdminSelect label="Status" value={selected.status} options={statuses} onChange={(value) => updateSelected({ status: value })} disabled={saving} /><div className="flex items-end"><button type="button" disabled={saving} onClick={() => updateSelected({ isArchived: !selected.isArchived })} className="inline-flex min-h-11 w-full items-center justify-center gap-2 border border-black/10 px-4 text-xs font-black uppercase tracking-[0.1em] transition hover:bg-black/5">{selected.isArchived ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}{selected.isArchived ? "Restore" : "Archive"}</button></div></div>
           <label className="mt-4 block"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.12em] text-black/40">Internal Notes</span><textarea value={selected.adminNotes || ""} onChange={(event) => setSelected((current) => ({ ...current, adminNotes: event.target.value }))} rows={5} className="w-full resize-none border border-black/10 bg-white p-3 text-sm leading-6 outline-none focus:border-[#b88731]" /></label>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-between"><button type="button" disabled={saving} onClick={removeSelected} className="inline-flex min-h-11 items-center justify-center gap-2 border border-red-700/20 px-4 text-xs font-black uppercase tracking-[0.1em] text-red-700 transition hover:bg-red-50"><Trash2 className="size-4" />Delete Permanently</button><button type="button" disabled={saving} onClick={() => updateSelected({ adminNotes: selected.adminNotes || "" })} className="min-h-11 bg-[#17130e] px-5 text-xs font-black uppercase tracking-[0.1em] text-[#efcb73] disabled:opacity-50">{saving ? "Saving..." : "Save Notes"}</button></div>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-between"><button type="button" disabled={saving} onClick={() => setConfirmDelete(true)} className="inline-flex min-h-11 items-center justify-center gap-2 border border-red-700/20 px-4 text-xs font-black uppercase tracking-[0.1em] text-red-700 transition hover:bg-red-50"><Trash2 className="size-4" />Delete Permanently</button><button type="button" disabled={saving} onClick={() => updateSelected({ adminNotes: selected.adminNotes || "" })} className="min-h-11 bg-[#17130e] px-5 text-xs font-black uppercase tracking-[0.1em] text-[#efcb73] disabled:opacity-50">{saving ? "Saving..." : "Save Notes"}</button></div>
         </div>
       </div></div> : null}
+
+      {confirmDelete && selected ? <div className="fixed inset-0 z-[120] grid place-items-center bg-black/75 p-4"><div className="w-full max-w-md border border-red-900/20 bg-[#fffaf2] p-6 shadow-2xl"><p className="text-[0.6rem] font-black uppercase tracking-[0.15em] text-red-700">Permanent deletion</p><h3 className="mt-2 font-serif text-3xl text-[#17130e]">Delete this record?</h3><p className="mt-3 text-sm leading-7 text-[#6c6254]">This removes {selected.name} permanently. Archive it instead if you may need the history later.</p><div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end"><button type="button" onClick={() => setConfirmDelete(false)} className="min-h-11 border border-black/10 px-5 text-xs font-black uppercase">Cancel</button><button type="button" disabled={saving} onClick={removeSelected} className="min-h-11 bg-red-700 px-5 text-xs font-black uppercase text-white disabled:opacity-50">{saving ? "Deleting..." : "Delete Permanently"}</button></div></div></div> : null}
     </section>
   );
 }
