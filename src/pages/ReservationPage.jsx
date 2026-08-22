@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import CustomSelect from "../components/ui/CustomSelect";
 import { buttonGold, internalHero, internalHeroInner, shell } from "../config/site";
 
-const outlets = ["Royalties Buffet - Jodhpur", "Royalties Buffet - Jaipur", "Royalties Buffet - Udaipur"];
+const outlets = ["Royalties Buffet - Gurugram", "Royalties Buffet - Delhi", "Royalties Buffet - Noida"];
 const guests = ["2 Guests", "3 Guests", "4 Guests", "5 Guests", "6 Guests", "7 Guests", "8 Guests", "9+ Guests"];
 const occasions = ["Casual Dining", "Birthday", "Anniversary", "Family Celebration", "Corporate Dinner", "Other"];
 const preferences = ["No Preference", "Mostly Vegetarian", "Mixed Veg & Non-Veg"];
