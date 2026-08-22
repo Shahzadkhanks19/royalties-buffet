@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://royalties-buffet-client.vercel.app/sitemap.xml
