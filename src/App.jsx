@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import SiteFooter from "./components/layout/SiteFooter";
 import SiteHeader from "./components/layout/SiteHeader";
+import RouteScrollManager from "./components/routing/RouteScrollManager";
 import ScrollTop from "./components/ui/ScrollTop";
 import useScrollPosition from "./hooks/useScrollPosition";
 import AboutPage from "./pages/AboutPage";
@@ -24,6 +25,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#050505] font-sans antialiased">
+      <RouteScrollManager />
       <SiteHeader />
       <main>
         <Routes>
