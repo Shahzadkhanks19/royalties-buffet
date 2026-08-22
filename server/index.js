@@ -1,9 +1,11 @@
 import express from "express";
 import { connectDatabase, databaseReady } from "./config/database.js";
 import { assertProductionEnv, env } from "./config/env.js";
+import { adminAudit } from "./middleware/adminAudit.js";
 import { errorHandler, notFoundHandler } from "./middleware/errors.js";
 import adminAvailabilityRoutes from "./routes/adminAvailability.js";
 import adminConfigRoutes from "./routes/adminConfig.js";
+import adminInsightsRoutes from "./routes/adminInsights.js";
 import adminRoutes from "./routes/admin.js";
 import publicConfigRoutes from "./routes/publicConfig.js";
 import publicRoutes from "./routes/public.js";
@@ -44,13 +46,15 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-// The main admin router owns both public authentication endpoints and
-// authenticated admin resources. It must be mounted before routers that apply
-// requireAdmin globally, otherwise /login, /forgot-password and
-// /reset-password are intercepted and incorrectly return 401.
+// Observe successful protected admin mutations without storing sensitive body data.
+app.use("/api/admin", adminAudit);
+
+// Public auth endpoints live inside adminRoutes, so it must be mounted before
+// routers that protect every route globally.
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin", adminConfigRoutes);
 app.use("/api/admin", adminAvailabilityRoutes);
+app.use("/api/admin", adminInsightsRoutes);
 app.use("/api", publicConfigRoutes);
 app.use("/api", publicRoutes);
 app.use(notFoundHandler);
