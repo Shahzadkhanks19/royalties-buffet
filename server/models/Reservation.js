@@ -13,6 +13,8 @@ const reservationSchema = new mongoose.Schema(
     email: { type: String, trim: true, lowercase: true, maxlength: 160, default: "" },
     requests: { type: String, trim: true, maxlength: 1000, default: "" },
     status: { type: String, enum: ["pending", "confirmed", "cancelled", "completed"], default: "pending", index: true },
+    adminNotes: { type: String, trim: true, maxlength: 3000, default: "" },
+    isArchived: { type: Boolean, default: false, index: true },
     source: { type: String, default: "website" },
   },
   { timestamps: true },
