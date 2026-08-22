@@ -8,17 +8,15 @@ import AboutPage from "./pages/AboutPage";
 import CateringPage from "./pages/CateringPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import ContactPage from "./pages/ContactPage";
+import FaqPage from "./pages/FaqPage";
 import FranchisePage from "./pages/FranchisePage";
 import GalleryPage from "./pages/GalleryPage";
 import HomePage from "./pages/HomePage";
 import LocationsPage from "./pages/LocationsPage";
 import MenuPage from "./pages/MenuPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import ReservationPage from "./pages/ReservationPage";
-
-const routedPlaceholders = [
-  "/privacy",
-  "/terms",
-];
+import TermsPage from "./pages/TermsPage";
 
 export default function App() {
   const { showTop, scrollToTop } = useScrollPosition();
@@ -38,9 +36,9 @@ export default function App() {
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/locations" element={<LocationsPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          {routedPlaceholders.map((path) => (
-            <Route key={path} path={path} element={<ComingSoonPage />} />
-          ))}
+          <Route path="/faq" element={<FaqPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
           <Route path="*" element={<ComingSoonPage />} />
         </Routes>
       </main>
