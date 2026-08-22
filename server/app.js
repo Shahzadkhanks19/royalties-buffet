@@ -18,8 +18,14 @@ export function createApp({ serveClient = false } = {}) {
 
   app.disable("x-powered-by");
   if (env.trustProxy) app.set("trust proxy", 1);
-  app.use(express.json({ limit: "256kb", strict: true }));
-  app.use(express.urlencoded({ extended: false, limit: "64kb", parameterLimit: 100 }));
+  app.use((req, res, next) => {
+    if (req.vercelParsedBody) return next();
+    return express.json({ limit: "256kb", strict: true })(req, res, next);
+  });
+  app.use((req, res, next) => {
+    if (req.vercelParsedBody) return next();
+    return express.urlencoded({ extended: false, limit: "64kb", parameterLimit: 100 })(req, res, next);
+  });
   app.use(securityHeaders);
 
   app.use((req, res, next) => {
