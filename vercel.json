@@ -8,8 +8,10 @@
       "maxDuration": 30
     }
   },
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    {
+      "source": "/((?!api(?:/|$)|assets(?:/|$)|favicon\\.ico$|robots\\.txt$|sitemap\\.xml$).*)",
+      "destination": "/index.html"
+    }
   ]
 }
