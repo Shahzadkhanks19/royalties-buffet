@@ -1,4 +1,4 @@
-import { CalendarClock, CalendarDays, Handshake, Images, LayoutDashboard, LogOut, Mail, MapPin, Settings, Soup, UtensilsCrossed, X } from "lucide-react";
+import { Activity, CalendarClock, CalendarDays, Handshake, Images, LayoutDashboard, LogOut, Mail, MapPin, Settings, Soup, UtensilsCrossed, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "./AdminAuthContext";
@@ -14,6 +14,7 @@ const nav = [
   [Images, "Gallery Manager", "/admin/gallery"],
   [MapPin, "Locations", "/admin/locations"],
   [Settings, "Site Settings", "/admin/settings"],
+  [Activity, "Activity Log", "/admin/activity"],
 ];
 
 export default function AdminLayout() {
