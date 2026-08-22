@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { buttonGold, buttonLightOutline, internalHero, internalHeroInner, shell } from "../config/site";
 import { menuImageFallback, menuItems } from "../data/menuItems";
 
-const categories = ["All", "Live Grill", "Starters", "Indian", "Italian", "Indo-Chinese", "Mexican", "Global", "Desserts", "Beverages"];
+const categories = ["All", "Live Grill", "Starters", "Indian", "Regional Indian", "Italian", "Indo-Chinese", "Mexican", "Japanese", "Middle Eastern", "Global", "Desserts", "Beverages"];
 
 const experience = [
   [Flame, "Live Grill", "Fresh off the flame, served sizzling and replenished throughout the experience."],
@@ -58,7 +58,7 @@ export default function MenuPage() {
           <div className="max-w-3xl">
             <p className="text-[0.7rem] font-black uppercase tracking-[0.3em] text-[#d8ab4d]">The Royalties Buffet</p>
             <h1 className="mt-5 font-serif text-[clamp(4rem,8vw,7.5rem)] leading-[0.86] tracking-[-0.05em]">A world of flavour.<br /><span className="text-[#d8ab4d]">One grand spread.</span></h1>
-            <p className="mt-7 max-w-2xl text-base leading-8 text-white/68 sm:text-lg">Explore Indian favourites alongside Italian, Indo-Chinese, Mexican and other popular global flavours, plus live grills and an indulgent dessert finish.</p>
+            <p className="mt-7 max-w-2xl text-base leading-8 text-white/68 sm:text-lg">Explore regional Indian favourites alongside Italian, Indo-Chinese, Mexican, Japanese, Middle Eastern and other popular global flavours, plus live grills and an indulgent dessert finish.</p>
           </div>
         </div>
       </section>
@@ -84,7 +84,7 @@ export default function MenuPage() {
               <p className="text-[0.68rem] font-black uppercase tracking-[0.28em] text-[#9d7328]">Explore the spread</p>
               <h2 className="mt-4 font-serif text-[clamp(3rem,5vw,5.2rem)] leading-[0.94] tracking-[-0.04em] text-[#17130e]">Familiar favourites. More to discover.</h2>
             </div>
-            <p className="max-w-md text-sm leading-7 text-[#6c6254]">A broad India-focused buffet mix with popular international cuisines. Non-vegetarian selections are limited to chicken, mutton, eggs and seafood.</p>
+            <p className="max-w-md text-sm leading-7 text-[#6c6254]">A broad India-focused buffet mix with popular international cuisines. Non-vegetarian selections remain limited to chicken, mutton, eggs and seafood.</p>
           </div>
 
           <div className="mt-10 flex flex-wrap gap-2" role="tablist" aria-label="Menu categories">
