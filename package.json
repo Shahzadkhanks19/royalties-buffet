@@ -20,7 +20,8 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "4.3.3",
+    "@eslint/js": "latest",
+    "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react": "6.1.0",
     "eslint": "latest",
     "eslint-plugin-react-hooks": "latest",
