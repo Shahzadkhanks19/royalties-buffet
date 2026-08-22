@@ -1,9 +1,12 @@
+import { databaseReady } from "../config/database.js";
 import AdminAccount from "../models/AdminAccount.js";
 import { ApiError } from "./errors.js";
 import { readCookie, verifyAdminSession } from "../utils/adminSession.js";
 
 export async function requireAdmin(req, _res, next) {
   try {
+    if (!databaseReady()) return next(new ApiError(503, "Database is not connected yet."));
+
     const session = verifyAdminSession(readCookie(req, "rb_admin"));
     if (!session) return next(new ApiError(401, "Admin authentication required."));
 
