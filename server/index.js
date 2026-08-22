@@ -3,6 +3,7 @@ import { connectDatabase, databaseReady } from "./config/database.js";
 import { assertProductionEnv, env } from "./config/env.js";
 import { adminAudit } from "./middleware/adminAudit.js";
 import { errorHandler, notFoundHandler } from "./middleware/errors.js";
+import { generalApiLimiter, loginLimiter, mutationLimiter, passwordResetLimiter, rejectSuspiciousKeys, securityHeaders } from "./middleware/security.js";
 import adminAvailabilityRoutes from "./routes/adminAvailability.js";
 import adminConfigRoutes from "./routes/adminConfig.js";
 import adminInsightsRoutes from "./routes/adminInsights.js";
@@ -15,8 +16,10 @@ import { seedCmsContent } from "./services/seedCms.js";
 const app = express();
 
 app.disable("x-powered-by");
-app.use(express.json({ limit: "1mb" }));
-app.use(express.urlencoded({ extended: false, limit: "1mb" }));
+if (env.trustProxy) app.set("trust proxy", 1);
+app.use(express.json({ limit: "256kb", strict: true }));
+app.use(express.urlencoded({ extended: false, limit: "64kb", parameterLimit: 100 }));
+app.use(securityHeaders);
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -24,19 +27,29 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader("Vary", "Origin");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   }
 
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("X-Frame-Options", "DENY");
+  if (req.method === "OPTIONS") {
+    if (!origin || origin !== env.clientOrigin) return res.sendStatus(403);
+    return res.sendStatus(204);
+  }
+  next();
+});
 
-  if (req.method === "OPTIONS") return res.sendStatus(204);
+app.use("/api", generalApiLimiter);
+app.use("/api", rejectSuspiciousKeys);
+app.use("/api/admin/login", loginLimiter);
+app.use("/api/admin/forgot-password", passwordResetLimiter);
+app.use("/api/admin/reset-password", passwordResetLimiter);
+app.use("/api", (req, res, next) => {
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) return mutationLimiter(req, res, next);
   next();
 });
 
 app.get("/api/health", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
   res.json({
     ok: true,
     service: "royalties-buffet-api",
