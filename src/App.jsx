@@ -7,9 +7,9 @@ import useScrollPosition from "./hooks/useScrollPosition";
 import AboutPage from "./pages/AboutPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import HomePage from "./pages/HomePage";
+import MenuPage from "./pages/MenuPage";
 
 const routedPlaceholders = [
-  "/menu",
   "/reservation",
   "/catering",
   "/franchise",
@@ -31,6 +31,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/menu" element={<MenuPage />} />
           {routedPlaceholders.map((path) => (
             <Route key={path} path={path} element={<ComingSoonPage />} />
           ))}
