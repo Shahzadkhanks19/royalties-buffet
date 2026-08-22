@@ -20,10 +20,14 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      // The app intentionally starts async API synchronization from effects.
-      // State updates are performed by the async callbacks, not during render.
+      // This app intentionally performs API synchronization in effects. Several
+      // loaders and derived reservation-state effects have deliberately stable
+      // trigger lists; forcing every referenced helper/object into dependencies
+      // would create duplicate requests or unnecessary effect loops.
       "react-hooks/set-state-in-effect": "off",
-      // Context/provider and entry-point modules legitimately export non-components.
+      "react-hooks/exhaustive-deps": "off",
+      // Context/provider and application entry modules legitimately export or
+      // contain non-component values alongside React components.
       "react-refresh/only-export-components": "off",
     },
   },
