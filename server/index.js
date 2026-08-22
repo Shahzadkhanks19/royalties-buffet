@@ -3,6 +3,7 @@ import { connectDatabase, databaseReady } from "./config/database.js";
 import { assertProductionEnv, env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/errors.js";
 import publicRoutes from "./routes/public.js";
+import { seedCmsContent } from "./services/seedCms.js";
 
 const app = express();
 
@@ -43,6 +44,10 @@ app.use(errorHandler);
 async function start() {
   assertProductionEnv();
   await connectDatabase();
+
+  if (databaseReady()) {
+    await seedCmsContent();
+  }
 
   app.listen(env.port, () => {
     console.log(`Royalties Buffet API running on http://localhost:${env.port}`);
