@@ -5,13 +5,13 @@ import CateringLead from "../models/CateringLead.js";
 import ContactEnquiry from "../models/ContactEnquiry.js";
 import FranchiseLead from "../models/FranchiseLead.js";
 import GalleryItem from "../models/GalleryItem.js";
+import Location from "../models/Location.js";
 import MenuItem from "../models/MenuItem.js";
 import Reservation from "../models/Reservation.js";
 import { cleanText, oneOf, optionalEmail, requirePhone, requireText } from "../utils/validation.js";
 
 const router = Router();
 
-const reservationOutlets = ["Royalties Buffet - Gurugram", "Royalties Buffet - Delhi", "Royalties Buffet - Noida"];
 const reservationGuests = ["2 Guests", "3 Guests", "4 Guests", "5 Guests", "6 Guests", "7 Guests", "8 Guests", "9+ Guests"];
 const reservationOccasions = ["Casual Dining", "Birthday", "Anniversary", "Family Celebration", "Corporate Dinner", "Other"];
 const reservationPreferences = ["No Preference", "Mostly Vegetarian", "Mixed Veg & Non-Veg"];
@@ -39,6 +39,10 @@ router.post("/reservations", async (req, res) => {
   const date = requireText(body.date, "Reservation date", 10, 20);
   const parsedDate = new Date(`${date}T00:00:00`);
   if (Number.isNaN(parsedDate.getTime())) throw new ApiError(400, "Reservation date is invalid.");
+
+  const locations = await Location.find({ isActive: true }).select({ city: 1 }).lean();
+  const reservationOutlets = locations.map((location) => `Royalties Buffet - ${location.city}`);
+  if (!reservationOutlets.length) throw new ApiError(503, "No reservation outlets are currently available.");
 
   const reservation = await Reservation.create({
     outlet: oneOf(body.outlet, reservationOutlets, "Outlet"),
