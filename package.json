@@ -9,6 +9,7 @@
     "dev:client": "node scripts/generate-seo.mjs && vite",
     "dev:server": "node --watch server/index.js",
     "build": "node scripts/generate-seo.mjs && vite build",
+    "start": "node server/index.js",
     "preview": "vite preview",
     "server": "node server/index.js",
     "audit:static": "node scripts/audit-static.mjs",
