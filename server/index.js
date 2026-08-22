@@ -2,6 +2,7 @@ import express from "express";
 import { connectDatabase, databaseReady } from "./config/database.js";
 import { assertProductionEnv, env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/errors.js";
+import adminAvailabilityRoutes from "./routes/adminAvailability.js";
 import adminConfigRoutes from "./routes/adminConfig.js";
 import adminRoutes from "./routes/admin.js";
 import publicConfigRoutes from "./routes/publicConfig.js";
@@ -44,6 +45,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/admin", adminConfigRoutes);
+app.use("/api/admin", adminAvailabilityRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api", publicConfigRoutes);
 app.use("/api", publicRoutes);
