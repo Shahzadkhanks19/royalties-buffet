@@ -9,6 +9,8 @@ const contactEnquirySchema = new mongoose.Schema(
     outlet: { type: String, required: true, trim: true, maxlength: 120 },
     message: { type: String, required: true, trim: true, maxlength: 2000 },
     status: { type: String, enum: ["new", "in-progress", "resolved", "closed"], default: "new", index: true },
+    adminNotes: { type: String, trim: true, maxlength: 3000, default: "" },
+    isArchived: { type: Boolean, default: false, index: true },
     source: { type: String, default: "website" },
   },
   { timestamps: true },
