@@ -10,6 +10,7 @@ import MenuItem from "../models/MenuItem.js";
 import Reservation from "../models/Reservation.js";
 import ReservationAvailability from "../models/ReservationAvailability.js";
 import { sendReservationEmailSafely } from "../services/reservationEmail.js";
+import { assertFutureReservationSlot, isPastReservationDate, isPastReservationSlot } from "../utils/reservationTime.js";
 import { cleanText, oneOf, optionalEmail, requirePhone, requireText } from "../utils/validation.js";
 
 const router = Router();
@@ -30,6 +31,7 @@ router.get("/reservation-availability", async (req, res) => {
   const outlet = String(req.query.outlet || "").trim();
   const date = String(req.query.date || "").trim();
   if (!outlet || !date) throw new ApiError(400, "Outlet and date are required.");
+  if (isPastReservationDate(date)) throw new ApiError(400, "Past reservation dates are not allowed.");
   const [rules, reservations] = await Promise.all([
     ReservationAvailability.find({ outlet, date }).lean(),
     Reservation.find({ outlet, date, status: { $in: ["pending", "confirmed"] }, isArchived: false }).select({ time: 1, guestCount: 1 }).lean(),
@@ -41,7 +43,8 @@ router.get("/reservation-availability", async (req, res) => {
     const rule = ruleMap.get(time);
     const capacity = rule?.capacity || defaultCapacity;
     const used = usage[time] || 0;
-    return { time, capacity, used, remaining: Math.max(0, capacity - used), isBlocked: Boolean(rule?.isBlocked), available: !rule?.isBlocked && used < capacity };
+    const passed = isPastReservationSlot(date, time);
+    return { time, capacity, used, remaining: Math.max(0, capacity - used), isBlocked: Boolean(rule?.isBlocked), isPast: passed, available: !passed && !rule?.isBlocked && used < capacity };
   });
   res.json({ ok: true, slots });
 });
@@ -57,6 +60,7 @@ router.post("/reservations", async (req, res) => {
   if (!reservationOutlets.length) throw new ApiError(503, "No reservation outlets are currently available.");
   const outlet = oneOf(body.outlet, reservationOutlets, "Outlet");
   const time = oneOf(body.time, reservationTimes, "Reservation time");
+  assertFutureReservationSlot(date, time, ApiError);
   const guestCount = oneOf(body.guestCount, reservationGuests, "Guest count");
   const requestedGuests = guestNumber(guestCount);
   const [rule, reservations] = await Promise.all([
@@ -67,7 +71,6 @@ router.post("/reservations", async (req, res) => {
   const capacity = rule?.capacity || defaultCapacity;
   const used = reservations.reduce((sum, item) => sum + guestNumber(item.guestCount), 0);
   if (used + requestedGuests > capacity) throw new ApiError(409, "This time slot no longer has enough availability for your party.");
-
   const reservation = await Reservation.create({ outlet, guestCount, occasion: oneOf(body.occasion, reservationOccasions, "Occasion"), preference: oneOf(body.preference, reservationPreferences, "Dining preference"), date, time, name: requireText(body.name, "Name", 2, 120), phone: requirePhone(body.phone), email: optionalEmail(body.email), requests: cleanText(body.requests, 1000) });
   await sendReservationEmailSafely("received", reservation);
   res.status(201).json({ ok: true, message: "Reservation request received.", id: reservation.id });
