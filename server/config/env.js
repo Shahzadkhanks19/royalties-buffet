@@ -6,6 +6,8 @@ try {
   if (error?.code !== "ENOENT") throw error;
 }
 
+const isVercel = Boolean(process.env.VERCEL);
+
 export const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: Number(process.env.PORT || 5000),
@@ -16,7 +18,8 @@ export const env = {
   adminSessionSecret: process.env.ADMIN_SESSION_SECRET || "",
   resendApiKey: process.env.RESEND_API_KEY || "",
   adminFromEmail: process.env.ADMIN_FROM_EMAIL || "",
-  trustProxy: process.env.TRUST_PROXY === "true" || process.env.TRUST_PROXY === "1",
+  isVercel,
+  trustProxy: isVercel || process.env.TRUST_PROXY === "true" || process.env.TRUST_PROXY === "1",
 };
 
 export function assertProductionEnv() {
