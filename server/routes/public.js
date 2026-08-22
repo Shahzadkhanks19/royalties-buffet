@@ -4,6 +4,8 @@ import { ApiError } from "../middleware/errors.js";
 import CateringLead from "../models/CateringLead.js";
 import ContactEnquiry from "../models/ContactEnquiry.js";
 import FranchiseLead from "../models/FranchiseLead.js";
+import GalleryItem from "../models/GalleryItem.js";
+import MenuItem from "../models/MenuItem.js";
 import Reservation from "../models/Reservation.js";
 import { cleanText, oneOf, optionalEmail, requirePhone, requireText } from "../utils/validation.js";
 
@@ -18,6 +20,18 @@ const reservationTimes = ["12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "7:00 PM"
 function ensureDatabase() {
   if (!databaseReady()) throw new ApiError(503, "Database is not connected yet. Please try again shortly.");
 }
+
+router.get("/menu", async (_req, res) => {
+  ensureDatabase();
+  const items = await MenuItem.find({ isActive: true }).sort({ sortOrder: 1, createdAt: 1 }).lean();
+  res.json({ ok: true, items });
+});
+
+router.get("/gallery", async (_req, res) => {
+  ensureDatabase();
+  const items = await GalleryItem.find({ isActive: true }).sort({ sortOrder: 1, createdAt: 1 }).lean();
+  res.json({ ok: true, items });
+});
 
 router.post("/reservations", async (req, res) => {
   ensureDatabase();
