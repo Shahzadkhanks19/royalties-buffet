@@ -14,6 +14,8 @@ export const env = {
   adminEmail: (process.env.ADMIN_EMAIL || "").trim().toLowerCase(),
   adminPassword: process.env.ADMIN_PASSWORD || "",
   adminSessionSecret: process.env.ADMIN_SESSION_SECRET || "",
+  resendApiKey: process.env.RESEND_API_KEY || "",
+  adminFromEmail: process.env.ADMIN_FROM_EMAIL || "",
 };
 
 export function assertProductionEnv() {
