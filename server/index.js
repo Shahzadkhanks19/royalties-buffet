@@ -1,28 +1,51 @@
 import express from "express";
-import mongoose from "mongoose";
+import { connectDatabase, databaseReady } from "./config/database.js";
+import { assertProductionEnv, env } from "./config/env.js";
+import { errorHandler, notFoundHandler } from "./middleware/errors.js";
+import publicRoutes from "./routes/public.js";
 
 const app = express();
-const port = Number(process.env.PORT ?? 5000);
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 
-app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, service: "royalties-buffet-api" });
-});
-
-async function start() {
-  const mongoUri = process.env.MONGODB_URI;
-
-  if (mongoUri) {
-    await mongoose.connect(mongoUri);
-    console.log("MongoDB connected");
-  } else {
-    console.warn("MONGODB_URI is not set; API is running without a database connection.");
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && origin === env.clientOrigin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   }
 
-  app.listen(port, () => {
-    console.log(`Royalties Buffet API running on http://localhost:${port}`);
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
+});
+
+app.get("/api/health", (_req, res) => {
+  res.json({
+    ok: true,
+    service: "royalties-buffet-api",
+    environment: env.nodeEnv,
+    database: databaseReady() ? "connected" : "disconnected",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.use("/api", publicRoutes);
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+async function start() {
+  assertProductionEnv();
+  await connectDatabase();
+
+  app.listen(env.port, () => {
+    console.log(`Royalties Buffet API running on http://localhost:${env.port}`);
   });
 }
 
