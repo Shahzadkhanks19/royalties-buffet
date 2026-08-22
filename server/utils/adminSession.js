@@ -11,8 +11,12 @@ function sign(value) {
   return createHmac("sha256", env.adminSessionSecret).update(value).digest("base64url");
 }
 
-export function createAdminSession(email) {
-  const payload = base64url(JSON.stringify({ email, exp: Math.floor(Date.now() / 1000) + SESSION_SECONDS }));
+export function createAdminSession(email, sessionVersion = 1) {
+  const payload = base64url(JSON.stringify({
+    email,
+    sessionVersion,
+    exp: Math.floor(Date.now() / 1000) + SESSION_SECONDS,
+  }));
   return `${payload}.${sign(payload)}`;
 }
 
