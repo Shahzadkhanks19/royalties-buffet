@@ -1,3 +1,4 @@
+import path from "node:path";
 import express from "express";
 import { connectDatabase, databaseReady } from "./config/database.js";
 import { assertProductionEnv, env } from "./config/env.js";
@@ -14,6 +15,7 @@ import { seedAdminAccount } from "./services/seedAdmin.js";
 import { seedCmsContent } from "./services/seedCms.js";
 
 const app = express();
+const distDirectory = path.resolve(process.cwd(), "dist");
 
 app.disable("x-powered-by");
 if (env.trustProxy) app.set("trust proxy", 1);
@@ -70,6 +72,28 @@ app.use("/api/admin", adminAvailabilityRoutes);
 app.use("/api/admin", adminInsightsRoutes);
 app.use("/api", publicConfigRoutes);
 app.use("/api", publicRoutes);
+
+if (env.nodeEnv === "production") {
+  app.use(express.static(distDirectory, {
+    index: false,
+    setHeaders(res, filePath) {
+      if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      } else {
+        res.setHeader("Cache-Control", "public, max-age=3600");
+      }
+    },
+  }));
+
+  // BrowserRouter routes such as /menu and /admin must return index.html when
+  // refreshed directly. API paths deliberately bypass this fallback.
+  app.use((req, res, next) => {
+    if (req.method !== "GET" || req.path.startsWith("/api/") || !req.accepts("html")) return next();
+    res.setHeader("Cache-Control", "no-cache");
+    return res.sendFile(path.join(distDirectory, "index.html"));
+  });
+}
+
 app.use(notFoundHandler);
 app.use(errorHandler);
 
@@ -83,7 +107,7 @@ async function start() {
   }
 
   app.listen(env.port, () => {
-    console.log(`Royalties Buffet API running on http://localhost:${env.port}`);
+    console.log(`Royalties Buffet ${env.nodeEnv === "production" ? "app" : "API"} running on port ${env.port}`);
   });
 }
 
