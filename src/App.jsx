@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
-import { ArrowUp, Facebook, Instagram, Youtube } from "lucide-react";
+import {
+  ArrowUp,
+  CalendarDays,
+  Check,
+  ChevronDown,
+  Clock3,
+  Facebook,
+  Instagram,
+  Users,
+  Youtube,
+} from "lucide-react";
 
 const shell = "mx-auto w-[min(1280px,calc(100%-2rem))] sm:w-[min(1280px,calc(100%-3rem))]";
 const navItems = [
@@ -41,24 +51,41 @@ const serviceLinks = ["Catering", "Franchise", "Private Events", "Bulk Bookings"
 const buttonGold = "inline-flex min-h-11 items-center justify-center border border-[#d8ab4d] bg-[#d8ab4d] px-5 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[#120f09] transition duration-300 hover:-translate-y-0.5 hover:bg-[#efc86f] hover:shadow-[0_12px_30px_rgba(216,171,77,.24)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d8ab4d]";
 const buttonOutline = "inline-flex min-h-11 items-center justify-center border border-[#d8ab4d]/55 bg-black/20 px-5 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[#efce83] transition duration-300 hover:-translate-y-0.5 hover:border-[#efc86f] hover:bg-[#d8ab4d]/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d8ab4d]";
 
+const browser = {
+  getScrollY() {
+    return typeof window === "undefined" ? 0 : window.scrollY;
+  },
+  getSectionTop(id) {
+    if (typeof document === "undefined") return Number.POSITIVE_INFINITY;
+    return document.getElementById(id)?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
+  },
+  subscribeToScroll(handler) {
+    if (typeof window === "undefined") return () => {};
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
+  },
+  scrollToTop() {
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  },
+};
+
 function useScrollSpy() {
   const [active, setActive] = useState("home");
   const [showTop, setShowTop] = useState(false);
 
   useEffect(() => {
     const onScroll = () => {
-      setShowTop(window.scrollY > 550);
+      setShowTop(browser.getScrollY() > 550);
       const ids = navItems.map(([, href]) => href.slice(1));
       let current = "home";
       for (const id of ids) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= 150) current = id;
+        if (browser.getSectionTop(id) <= 150) current = id;
       }
       setActive(current);
     };
+
     onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return browser.subscribeToScroll(onScroll);
   }, []);
 
   return { active, showTop };
@@ -299,28 +326,74 @@ function Gallery() {
   );
 }
 
-function Reservation() {
+function CustomSelect({ label, value, placeholder, options, icon: Icon, onChange }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <section id="reservation" className="relative overflow-hidden bg-[#0a0a0a] py-16 text-white lg:py-20">
-      <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2200&q=80" alt="Elegant dining table" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-25" />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,.96),rgba(5,5,5,.85),rgba(5,5,5,.92))]" />
+    <div className="relative">
+      <span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">{label}</span>
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        className={`group flex min-h-12 w-full items-center gap-3 border bg-black/55 px-4 text-left text-sm transition duration-300 ${open ? "border-[#d8ab4d] shadow-[0_0_0_3px_rgba(216,171,77,.08)]" : "border-[#d8ab4d]/28 hover:border-[#d8ab4d]/60"}`}
+      >
+        <Icon className="size-4 shrink-0 text-[#d8ab4d]" strokeWidth={1.8} />
+        <span className={`min-w-0 flex-1 truncate ${value ? "text-white" : "text-white/45"}`}>{value || placeholder}</span>
+        <ChevronDown className={`size-4 shrink-0 text-white/45 transition duration-300 ${open ? "rotate-180 text-[#d8ab4d]" : "group-hover:text-white"}`} strokeWidth={1.8} />
+      </button>
+
+      {open && (
+        <div role="listbox" aria-label={label} className="absolute inset-x-0 top-[calc(100%+6px)] z-40 overflow-hidden border border-[#d8ab4d]/30 bg-[#0b0b0b] p-1.5 shadow-[0_18px_55px_rgba(0,0,0,.5)]">
+          {options.map((option) => {
+            const selected = option === value;
+            return (
+              <button
+                type="button"
+                role="option"
+                aria-selected={selected}
+                key={option}
+                onClick={() => {
+                  onChange(option);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center justify-between gap-4 px-3 py-3 text-left text-sm transition ${selected ? "bg-[#d8ab4d]/12 text-[#f1ce81]" : "text-white/65 hover:bg-white/[0.05] hover:text-white"}`}
+              >
+                <span>{option}</span>
+                {selected && <Check className="size-4 text-[#d8ab4d]" strokeWidth={2} />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Reservation() {
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [guests, setGuests] = useState("2 Guests");
+
+  return (
+    <section id="reservation" className="relative overflow-visible bg-[#0a0a0a] py-16 text-white lg:py-20">
+      <div className="absolute inset-0 overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2200&q=80" alt="Elegant dining table" loading="lazy" className="h-full w-full object-cover opacity-25" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,.96),rgba(5,5,5,.85),rgba(5,5,5,.92))]" />
+      </div>
       <div className={`${shell} relative z-10 grid gap-8 lg:grid-cols-[.8fr_1.2fr] lg:items-end`}>
         <div>
           <p className="text-[0.64rem] font-black uppercase tracking-[0.24em] text-[#d8ab4d]">Reserve your experience</p>
           <h2 className="mt-3 font-serif text-[clamp(3rem,5vw,5rem)] leading-[0.95]">Book your table now.</h2>
           <p className="mt-4 max-w-lg text-sm leading-7 text-white/48">Choose your date, time and party size. The full reservation workflow will connect to the Express/MongoDB backend.</p>
         </div>
-        <form className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {[["Date", "Select Date"], ["Time", "Select Time"], ["Guests", "2 Guests"]].map(([label, placeholder]) => (
-            <label key={label} className="grid gap-2 text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">
-              <span>{label}</span>
-              <select defaultValue="" className="min-h-12 border border-[#d8ab4d]/28 bg-black/55 px-4 text-sm font-medium normal-case tracking-normal text-white outline-none transition focus:border-[#d8ab4d]">
-                <option value="" disabled>{placeholder}</option><option>Option 1</option><option>Option 2</option>
-              </select>
-            </label>
-          ))}
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <CustomSelect label="Date" value={date} placeholder="Select Date" options={["Today", "Tomorrow", "This Weekend", "Next Week"]} icon={CalendarDays} onChange={setDate} />
+          <CustomSelect label="Time" value={time} placeholder="Select Time" options={["12:30 PM", "1:30 PM", "7:00 PM", "8:00 PM", "9:00 PM"]} icon={Clock3} onChange={setTime} />
+          <CustomSelect label="Guests" value={guests} placeholder="Select Guests" options={["1 Guest", "2 Guests", "3 Guests", "4 Guests", "5 Guests", "6+ Guests"]} icon={Users} onChange={setGuests} />
           <button type="button" className={`${buttonGold} self-end`}>Book Now</button>
-        </form>
+        </div>
       </div>
     </section>
   );
@@ -351,7 +424,7 @@ function Footer() {
 
 function ScrollTop({ visible }) {
   return (
-    <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Scroll to top" className={`fixed bottom-6 right-6 z-40 grid size-12 place-items-center rounded-full bg-[#d8ab4d] text-black shadow-[0_14px_40px_rgba(0,0,0,.35)] transition duration-300 hover:-translate-y-1 hover:bg-[#efc86f] ${visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"}`}>
+    <button type="button" onClick={browser.scrollToTop} aria-label="Scroll to top" className={`fixed bottom-6 right-6 z-40 grid size-12 place-items-center rounded-full bg-[#d8ab4d] text-black shadow-[0_14px_40px_rgba(0,0,0,.35)] transition duration-300 hover:-translate-y-1 hover:bg-[#efc86f] ${visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"}`}>
       <ArrowUp className="size-5" strokeWidth={2.2} />
     </button>
   );
