@@ -30,6 +30,10 @@ export function putJson(path, body) {
   return apiRequest(path, { method: "PUT", body: JSON.stringify(body) });
 }
 
+export function patchJson(path, body) {
+  return apiRequest(path, { method: "PATCH", body: JSON.stringify(body) });
+}
+
 export function deleteJson(path) {
   return apiRequest(path, { method: "DELETE" });
 }
