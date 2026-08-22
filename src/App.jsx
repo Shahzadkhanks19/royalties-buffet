@@ -10,6 +10,7 @@ import useScrollPosition from "./hooks/useScrollPosition";
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const CateringPage = lazy(() => import("./pages/CateringPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const ErrorPage = lazy(() => import("./pages/ErrorPage"));
 const FaqPage = lazy(() => import("./pages/FaqPage"));
 const FranchisePage = lazy(() => import("./pages/FranchisePage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/error" element={<ErrorPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
