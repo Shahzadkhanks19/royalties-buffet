@@ -21,9 +21,9 @@ const galleryItems = [
 ];
 
 const sizeClasses = {
-  tall: "md:row-span-2 min-h-[520px]",
-  wide: "md:col-span-2 min-h-[300px]",
-  standard: "min-h-[300px]",
+  tall: "md:row-span-2",
+  wide: "md:col-span-2",
+  standard: "",
 };
 
 export default function GalleryPage() {
@@ -70,9 +70,9 @@ export default function GalleryPage() {
             })}
           </div>
 
-          <div className="mt-10 grid auto-rows-[250px] gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 md:auto-rows-[280px] xl:grid-cols-4 xl:auto-rows-[260px]">
             {visibleItems.map((item) => (
-              <button key={item.title} type="button" onClick={() => setActiveItem(item)} className={`group relative overflow-hidden bg-black text-left ${sizeClasses[item.size] || sizeClasses.standard}`} aria-label={`Open ${item.title} image`}>
+              <button key={item.title} type="button" onClick={() => setActiveItem(item)} className={`group relative min-h-[280px] overflow-hidden bg-black text-left md:min-h-0 ${sizeClasses[item.size] || ""}`} aria-label={`Open ${item.title} image`}>
                 <img src={item.image} alt={item.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent transition duration-500 group-hover:bg-black/28" />
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 sm:p-6">
