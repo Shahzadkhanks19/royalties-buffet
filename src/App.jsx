@@ -8,9 +8,9 @@ import AboutPage from "./pages/AboutPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import HomePage from "./pages/HomePage";
 import MenuPage from "./pages/MenuPage";
+import ReservationPage from "./pages/ReservationPage";
 
 const routedPlaceholders = [
-  "/reservation",
   "/catering",
   "/franchise",
   "/gallery",
@@ -32,6 +32,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/menu" element={<MenuPage />} />
+          <Route path="/reservation" element={<ReservationPage />} />
           {routedPlaceholders.map((path) => (
             <Route key={path} path={path} element={<ComingSoonPage />} />
           ))}
