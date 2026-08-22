@@ -1,0 +1,21 @@
+{
+  "name": "Royalties Buffet",
+  "short_name": "Royalties",
+  "description": "Premium buffet dining, catering and franchise experiences across Delhi NCR.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#0d0d0d",
+  "icons": [
+    {
+      "src": "/royalties-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/royalties-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
