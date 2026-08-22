@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import SiteFooter from "./components/layout/SiteFooter";
 import SiteHeader from "./components/layout/SiteHeader";
 import RouteScrollManager from "./components/routing/RouteScrollManager";
+import SeoManager from "./components/seo/SeoManager";
 import { PageSkeleton } from "./components/system/LoadingSkeletons";
 import ScrollTop from "./components/ui/ScrollTop";
 import useScrollPosition from "./hooks/useScrollPosition";
@@ -27,6 +28,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#050505] font-sans antialiased">
+      <SeoManager />
       <RouteScrollManager />
       <SiteHeader />
       <main>
