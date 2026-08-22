@@ -5,8 +5,10 @@ import AdminDashboardPage from "./admin/AdminDashboardPage";
 import AdminForgotPasswordPage from "./admin/AdminForgotPasswordPage";
 import AdminLayout from "./admin/AdminLayout";
 import AdminLeadManager from "./admin/AdminLeadManager";
+import AdminLocationsPage from "./admin/AdminLocationsPage";
 import AdminLoginPage from "./admin/AdminLoginPage";
 import AdminResetPasswordPage from "./admin/AdminResetPasswordPage";
+import AdminSettingsPage from "./admin/AdminSettingsPage";
 import ProtectedAdminRoute from "./admin/ProtectedAdminRoute";
 import SiteFooter from "./components/layout/SiteFooter";
 import SiteHeader from "./components/layout/SiteHeader";
@@ -69,6 +71,8 @@ export default function App() {
               <Route path="franchise" element={<AdminLeadManager kind="franchise" />} />
               <Route path="menu" element={<AdminContentManager kind="menu" />} />
               <Route path="gallery" element={<AdminContentManager kind="gallery" />} />
+              <Route path="locations" element={<AdminLocationsPage />} />
+              <Route path="settings" element={<AdminSettingsPage />} />
             </Route>
 
             <Route path="*" element={<NotFoundPage />} />
