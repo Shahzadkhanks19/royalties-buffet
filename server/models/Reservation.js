@@ -1,5 +1,20 @@
 import mongoose from "mongoose";
 
+const historySchema = new mongoose.Schema(
+  {
+    action: { type: String, required: true, trim: true, maxlength: 80 },
+    fromStatus: { type: String, trim: true, maxlength: 40, default: "" },
+    toStatus: { type: String, trim: true, maxlength: 40, default: "" },
+    fromDate: { type: String, trim: true, maxlength: 20, default: "" },
+    toDate: { type: String, trim: true, maxlength: 20, default: "" },
+    fromTime: { type: String, trim: true, maxlength: 20, default: "" },
+    toTime: { type: String, trim: true, maxlength: 20, default: "" },
+    note: { type: String, trim: true, maxlength: 500, default: "" },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false },
+);
+
 const reservationSchema = new mongoose.Schema(
   {
     outlet: { type: String, required: true, trim: true, maxlength: 120 },
@@ -14,6 +29,7 @@ const reservationSchema = new mongoose.Schema(
     requests: { type: String, trim: true, maxlength: 1000, default: "" },
     status: { type: String, enum: ["pending", "confirmed", "cancelled", "completed"], default: "pending", index: true },
     adminNotes: { type: String, trim: true, maxlength: 3000, default: "" },
+    history: { type: [historySchema], default: [] },
     isArchived: { type: Boolean, default: false, index: true },
     source: { type: String, default: "website" },
   },
