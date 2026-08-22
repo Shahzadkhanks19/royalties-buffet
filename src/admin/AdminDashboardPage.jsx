@@ -12,9 +12,25 @@ const cards = [
   [Images, "Gallery Items", "gallery", "/admin/gallery"],
 ];
 
+const widthClasses = [
+  "w-[5%]", "w-[10%]", "w-[15%]", "w-[20%]", "w-[25%]", "w-[30%]", "w-[35%]", "w-[40%]", "w-[45%]", "w-[50%]",
+  "w-[55%]", "w-[60%]", "w-[65%]", "w-[70%]", "w-[75%]", "w-[80%]", "w-[85%]", "w-[90%]", "w-[95%]", "w-full",
+];
+
+const heightClasses = [
+  "h-[8px]", "h-[16px]", "h-[24px]", "h-[32px]", "h-[40px]", "h-[48px]", "h-[56px]", "h-[64px]", "h-[72px]", "h-[80px]",
+  "h-[88px]", "h-[96px]", "h-[104px]", "h-[112px]", "h-[120px]", "h-[128px]", "h-[136px]", "h-[144px]", "h-[152px]", "h-[160px]",
+];
+
+function scaleClass(value, max, classes) {
+  const ratio = Math.max(0, Math.min(1, Number(value || 0) / Math.max(Number(max || 0), 1)));
+  const index = Math.max(0, Math.min(classes.length - 1, Math.ceil(ratio * classes.length) - 1));
+  return classes[index];
+}
+
 function MetricBars({ items = [], empty = "No data yet." }) {
   const max = Math.max(...items.map((item) => item.count), 1);
-  return <div className="mt-5 space-y-4">{items.length ? items.map((item) => <div key={item.label}><div className="mb-1 flex items-center justify-between gap-3 text-xs"><span className="truncate font-bold text-[#4f4538]">{item.label}</span><strong className="text-[#8a641f]">{item.count}</strong></div><div className="h-2 bg-black/7"><div className="h-full bg-[#b88731]" style={{ width: `${Math.max(5, (item.count / max) * 100)}%` }} /></div></div>) : <p className="text-sm text-black/40">{empty}</p>}</div>;
+  return <div className="mt-5 space-y-4">{items.length ? items.map((item) => <div key={item.label}><div className="mb-1 flex items-center justify-between gap-3 text-xs"><span className="truncate font-bold text-[#4f4538]">{item.label}</span><strong className="text-[#8a641f]">{item.count}</strong></div><div className="h-2 bg-black/7"><div className={`h-full bg-[#b88731] ${scaleClass(item.count, max, widthClasses)}`} /></div></div>) : <p className="text-sm text-black/40">{empty}</p>}</div>;
 }
 
 export default function AdminDashboardPage() {
@@ -42,7 +58,7 @@ export default function AdminDashboardPage() {
     <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{cards.map(([Icon,label,key,to]) => <Link key={to} to={to} className="group border border-black/10 bg-[#fffaf2] p-6 shadow-[0_18px_40px_rgba(36,24,10,.08)] transition hover:-translate-y-1 hover:border-[#b98832]/45"><div className="grid size-11 place-items-center bg-[#17130e] text-[#d8ab4d]"><Icon className="size-5" /></div><p className="mt-8 text-[0.62rem] font-black uppercase tracking-[0.14em] text-[#8b682b]">{label}</p><strong className="mt-2 block font-serif text-5xl text-[#17130e]">{counts[key] || 0}</strong><span className="mt-5 inline-block text-sm font-bold text-[#6c6254] group-hover:text-[#8b682b]">Open manager →</span></Link>)}</div>
 
     <div className="mt-8 grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
-      <article className="border border-black/10 bg-[#fffaf2] p-5 sm:p-6"><div className="flex items-end justify-between gap-4"><div><p className="text-[0.6rem] font-black uppercase tracking-[0.14em] text-[#956c25]">7-day trend</p><h2 className="mt-2 font-serif text-3xl text-[#17130e]">Reservation requests</h2></div><strong className="font-serif text-4xl text-[#8a641f]">{analytics?.reservations?.total || 0}</strong></div><div className="mt-8 flex h-52 items-end gap-2 border-b border-black/10 pb-1">{(analytics?.reservations?.trend || []).map((item) => <div key={item.date} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-2"><span className="text-[0.58rem] font-bold text-black/45">{item.count}</span><div className="w-full bg-[#b88731]" style={{ height: `${Math.max(6, (item.count / maxTrend) * 155)}px` }} /><span className="text-[0.52rem] text-black/40">{item.date.slice(5)}</span></div>)}</div></article>
+      <article className="border border-black/10 bg-[#fffaf2] p-5 sm:p-6"><div className="flex items-end justify-between gap-4"><div><p className="text-[0.6rem] font-black uppercase tracking-[0.14em] text-[#956c25]">7-day trend</p><h2 className="mt-2 font-serif text-3xl text-[#17130e]">Reservation requests</h2></div><strong className="font-serif text-4xl text-[#8a641f]">{analytics?.reservations?.total || 0}</strong></div><div className="mt-8 flex h-52 items-end gap-2 border-b border-black/10 pb-1">{(analytics?.reservations?.trend || []).map((item) => <div key={item.date} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-2"><span className="text-[0.58rem] font-bold text-black/45">{item.count}</span><div className={`w-full bg-[#b88731] ${scaleClass(item.count, maxTrend, heightClasses)}`} /><span className="text-[0.52rem] text-black/40">{item.date.slice(5)}</span></div>)}</div></article>
       <article className="border border-black/10 bg-[#17130e] p-5 text-white sm:p-6"><p className="text-[0.6rem] font-black uppercase tracking-[0.14em] text-[#d8ab4d]">Reservation status</p><h2 className="mt-2 font-serif text-3xl">Current pipeline</h2><div className="mt-6 grid grid-cols-2 gap-3">{Object.entries(statusCounts).map(([status,count]) => <div key={status} className="border border-white/10 bg-white/[0.03] p-4"><p className="text-[0.58rem] font-black uppercase tracking-[0.1em] text-white/45">{status}</p><strong className="mt-2 block font-serif text-3xl text-[#efcb73]">{count}</strong></div>)}</div></article>
     </div>
 
