@@ -1,7 +1,10 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { loadEnv } from "vite";
 
-const rawSiteUrl = process.env.VITE_SITE_URL?.trim() || "";
+const mode = process.env.NODE_ENV === "production" ? "production" : "development";
+const env = loadEnv(mode, process.cwd(), "VITE_");
+const rawSiteUrl = (process.env.VITE_SITE_URL || env.VITE_SITE_URL || "").trim();
 const siteUrl = rawSiteUrl.replace(/\/+$/, "");
 const publicDir = path.resolve("public");
 
