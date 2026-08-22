@@ -1,29 +1,38 @@
-# Royalties Buffet — Production Deployment
+# Royalties Buffet — Vercel Deployment
 
-Royalties Buffet is deployed as one Node.js service in production.
+Royalties Buffet is configured as a full-stack Vercel project.
 
 - Vite builds the React client into `dist/`.
-- Express serves `dist/` and all `/api/*` endpoints from the same process.
-- BrowserRouter routes such as `/menu`, `/reservation`, and `/admin` fall back to `dist/index.html` on direct refresh.
-- Hashed files under `dist/assets/` receive long-lived immutable cache headers.
-- API routes never use the SPA fallback.
+- Vercel serves the static frontend directly from `dist/`.
+- Express is exposed through Vercel Node.js serverless functions under `api/`.
+- `/api/*` remains on the same Vercel origin as the website, so HttpOnly admin cookies continue to work without cross-domain auth.
+- BrowserRouter routes such as `/menu`, `/reservation`, `/admin`, and `/admin/reservations` fall back to `dist/index.html` when refreshed directly.
+- MongoDB connections are reused while a serverless instance remains warm.
 
-## Runtime requirements
+## Required external services
 
-- Node.js 22.12.0 or newer
-- MongoDB connection string
-- HTTPS production domain
-- A reverse proxy / platform proxy in front of Node for TLS (Nginx, Cloudflare, managed hosting proxy, etc.)
+- MongoDB Atlas
+- Resend for production email delivery
+- Vercel for frontend + serverless API hosting
 
-## Production environment
+## Vercel project setup
+
+1. Push the latest `main` branch to GitHub.
+2. In Vercel, choose **Add New Project** and import `Shahzadkhanks19/royalties-buffet`.
+3. Vercel should detect Vite. The repository `vercel.json` already defines the production build and SPA routing.
+4. Keep the project root as the repository root.
+5. Add the production environment variables listed below.
+6. Deploy.
+
+You do not need a second backend deployment and you do not need to run `npm start` on Vercel. Vercel invokes the files in `api/` as serverless functions automatically.
+
+## Production environment variables
+
+Add these in **Vercel → Project Settings → Environment Variables** for Production. Add them to Preview too if you want preview deployments to have a working database/admin/API.
 
 ```env
-NODE_ENV=production
-PORT=5000
-CLIENT_ORIGIN=https://your-domain.com
-TRUST_PROXY=true
-
-VITE_SITE_URL=https://your-domain.com
+CLIENT_ORIGIN=https://your-production-domain.com
+VITE_SITE_URL=https://your-production-domain.com
 
 MONGODB_URI=mongodb+srv://...
 
@@ -35,61 +44,103 @@ RESEND_API_KEY=re_...
 ADMIN_FROM_EMAIL=Royalties Buffet <noreply@your-domain.com>
 ```
 
-`ADMIN_EMAIL` and `ADMIN_PASSWORD` seed the first MongoDB admin account only. After the account exists, use the Forgot/Reset Password workflow to change its password.
+Vercel supplies `NODE_ENV=production` and its own runtime variables. `TRUST_PROXY` does not need to be set on Vercel because the application detects the Vercel runtime and enables Express proxy trust automatically.
 
-For production email delivery, verify the sending domain with Resend and replace the testing `onboarding@resend.dev` address.
+`ADMIN_EMAIL` and `ADMIN_PASSWORD` seed the first MongoDB admin account only. Once the account exists, change the password through the Forgot/Reset Password workflow rather than editing `ADMIN_PASSWORD`.
+
+For Resend production delivery, verify the sending domain and use an address on that verified domain. `onboarding@resend.dev` is only suitable for testing.
+
+## Production domain and SEO
+
+Set both values to the final public HTTPS origin:
+
+```env
+CLIENT_ORIGIN=https://www.example.com
+VITE_SITE_URL=https://www.example.com
+```
+
+`CLIENT_ORIGIN` is used by backend origin/CORS checks and password reset links. `VITE_SITE_URL` is used at build time to generate canonical URLs, `robots.txt`, and `sitemap.xml`.
+
+If `VITE_SITE_URL` is missing, the build intentionally generates noindex-safe SEO files. That is useful for local/preview environments but should not be left unset for the production domain.
+
+When using a Vercel preview deployment, its URL differs from the production domain. If Preview needs fully functional mutation requests, set Preview-scoped `CLIENT_ORIGIN` appropriately or use the production/custom domain for final end-to-end testing.
+
+## MongoDB Atlas
+
+Use a dedicated Atlas database/user for Royalties Buffet. The Vercel functions connect through `MONGODB_URI` and reuse the Mongoose connection within warm serverless instances.
+
+Atlas network access must allow requests from the Vercel runtime. For a simple initial deployment, Atlas deployments commonly allow `0.0.0.0/0` and rely on strong database credentials/TLS; for stricter networking, use the networking options supported by your Atlas/Vercel plans.
+
+Never commit the MongoDB connection string to GitHub.
 
 ## Validate before deployment
 
+Run locally before pushing:
+
 ```bash
 npm ci
 npm run check
 ```
 
-`npm run check` runs the project static rules audit, ESLint with zero warnings allowed, SEO generation, and the Vite production build.
+`npm run check` runs the static project audit, ESLint with zero warnings, SEO generation, and the Vite production build.
 
-When `VITE_SITE_URL` is set, SEO generation creates production canonical/robots/sitemap output. When it is missing, the generator intentionally produces noindex-safe output.
+## Serverless API structure
 
-## Start production
+The Vercel entrypoints are:
 
-Build first:
-
-```bash
-npm run build
+```text
+api/index.js
+api/[...path].js
 ```
 
-Then start the Express application:
+Both delegate to the shared Express handler in `server/vercelHandler.js`. The normal local development server still uses `server/index.js`, so this continues to work locally:
 
 ```bash
-npm start
+npm run dev
 ```
 
-The Node process serves both the website and API on `PORT`.
+## SPA routing
+
+`vercel.json` first lets Vercel resolve real files/functions. Any remaining browser route falls back to `/index.html`. Therefore URLs such as these can be opened or refreshed directly:
+
+```text
+/about
+/menu
+/reservation
+/admin/login
+/admin/reservations
+```
+
+API routes are resolved as serverless functions before the SPA fallback.
 
 ## Health check
 
+After deployment, open:
+
 ```text
-GET /api/health
+https://your-domain.com/api/health
 ```
 
-The response reports the service environment, MongoDB connection state, and current timestamp. Configure the hosting platform or reverse proxy to use this endpoint for application health checks where supported.
+A healthy response should report:
 
-## Reverse proxy
+- `ok: true`
+- `database: connected`
+- `runtime: vercel`
 
-Forward the public HTTPS origin to the Node process on `127.0.0.1:5000` (or the configured `PORT`). Preserve the original host/protocol headers and enable WebSocket forwarding if future realtime features require it.
+If the database says `disconnected` or the function returns an initialization error, check the Vercel Function Logs and the `MONGODB_URI` environment variable.
 
-Do not expose the Node port publicly when a reverse proxy is available. Allow public traffic through ports 80/443 only and redirect HTTP to HTTPS.
+## Deployment updates
 
-Because `TRUST_PROXY=true` is required in production behind a proxy, Express can use the real client IP for rate limiting and HTTPS-aware security behavior.
-
-## Deployment sequence for updates
+Once GitHub is connected to Vercel, normal updates are:
 
 ```bash
-git pull --rebase origin main
-npm ci
-npm run check
-npm run build
-# restart the production Node process through the selected process manager/platform
+git push origin main
 ```
 
-Do not commit `.env` or production secrets to GitHub.
+Vercel automatically builds and deploys the new commit. Run `npm run check` locally before pushing production changes.
+
+## Local production mode
+
+`npm start` is retained for non-Vercel/self-hosted use. Vercel does not use that command for request handling.
+
+Do not commit `.env` or any production secrets to GitHub.
