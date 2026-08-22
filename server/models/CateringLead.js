@@ -12,6 +12,8 @@ const cateringLeadSchema = new mongoose.Schema(
     venue: { type: String, trim: true, maxlength: 180, default: "" },
     notes: { type: String, trim: true, maxlength: 2500, default: "" },
     status: { type: String, enum: ["new", "contacted", "qualified", "proposal", "won", "lost"], default: "new", index: true },
+    adminNotes: { type: String, trim: true, maxlength: 3000, default: "" },
+    isArchived: { type: Boolean, default: false, index: true },
     source: { type: String, default: "website" },
   },
   { timestamps: true },
