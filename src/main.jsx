@@ -5,6 +5,7 @@ import App from "./App";
 import { AdminAuthProvider } from "./admin/AdminAuthContext";
 import GlobalErrorBoundary from "./components/system/GlobalErrorBoundary";
 import Preloader from "./components/system/Preloader";
+import { SiteSettingsProvider } from "./context/SiteSettingsContext";
 import "./index.css";
 
 function RoyaltiesApp() {
@@ -20,7 +21,9 @@ function RoyaltiesApp() {
   return (
     <GlobalErrorBoundary>
       <AdminAuthProvider>
-        <App />
+        <SiteSettingsProvider>
+          <App />
+        </SiteSettingsProvider>
       </AdminAuthProvider>
     </GlobalErrorBoundary>
   );
