@@ -1,12 +1,14 @@
 import { CalendarDays, Check, Clock3, MapPin, PartyPopper, Phone, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "../components/ui/CustomSelect";
 import SafeImage from "../components/ui/SafeImage";
 import { buttonGold, internalHero, internalHeroInner, shell } from "../config/site";
+import { locationItems } from "../data/locations";
 import useApiSubmission from "../hooks/useApiSubmission";
+import { apiRequest } from "../lib/api";
 import { fieldClass, textareaClass, validateCommonLeadFields } from "../utils/validation";
 
-const outlets = ["Royalties Buffet - Gurugram", "Royalties Buffet - Delhi", "Royalties Buffet - Noida"];
+const fallbackOutlets = locationItems.map((location) => `Royalties Buffet - ${location.city}`);
 const guests = ["2 Guests", "3 Guests", "4 Guests", "5 Guests", "6 Guests", "7 Guests", "8 Guests", "9+ Guests"];
 const occasions = ["Casual Dining", "Birthday", "Anniversary", "Family Celebration", "Corporate Dinner", "Other"];
 const preferences = ["No Preference", "Mostly Vegetarian", "Mixed Veg & Non-Veg"];
@@ -23,8 +25,8 @@ const dates = Array.from({ length: 7 }, (_, index) => {
   };
 });
 
-const createInitialForm = () => ({
-  outlet: outlets[0],
+const createInitialForm = (outletOptions = fallbackOutlets) => ({
+  outlet: outletOptions[0] || "",
   guestCount: "4 Guests",
   occasion: "Casual Dining",
   preference: "No Preference",
@@ -41,9 +43,23 @@ function ErrorText({ message }) {
 }
 
 export default function ReservationPage() {
-  const [form, setForm] = useState(createInitialForm);
+  const [outlets, setOutlets] = useState(fallbackOutlets);
+  const [form, setForm] = useState(() => createInitialForm(fallbackOutlets));
   const [errors, setErrors] = useState({});
   const { submitting, serverError, successMessage, submit, clearSubmissionState } = useApiSubmission();
+
+  useEffect(() => {
+    let active = true;
+    apiRequest("/api/locations")
+      .then((result) => {
+        if (!active || !Array.isArray(result?.items) || !result.items.length) return;
+        const nextOutlets = result.items.map((location) => `Royalties Buffet - ${location.city}`);
+        setOutlets(nextOutlets);
+        setForm((current) => nextOutlets.includes(current.outlet) ? current : { ...current, outlet: nextOutlets[0] });
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   const selectedDate = useMemo(() => dates.find((date) => date.value === form.date), [form.date]);
   const update = (key, value) => {
@@ -60,7 +76,7 @@ export default function ReservationPage() {
 
     const result = await submit("/api/reservations", form);
     if (result) {
-      setForm(createInitialForm());
+      setForm(createInitialForm(outlets));
       setErrors({});
     }
   };
@@ -93,12 +109,12 @@ export default function ReservationPage() {
               <label className="block md:col-span-2"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Special requests</span><textarea value={form.requests} onChange={(event) => update("requests", event.target.value)} placeholder="High chair, celebration note, accessibility needs, seating preference..." rows={4} className={textareaClass(false)} /></label>
             </div>
 
-            <button type="submit" disabled={submitting} className={`${buttonGold} mt-7 w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}>{submitting ? "Submitting..." : "Confirm Reservation Request"}</button>
+            <button type="submit" disabled={submitting || !form.outlet} className={`${buttonGold} mt-7 w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}>{submitting ? "Submitting..." : "Confirm Reservation Request"}</button>
             {serverError ? <div className="mt-6 border border-red-400/25 bg-red-400/8 p-4 text-sm text-red-200" role="alert">{serverError}</div> : null}
             {successMessage ? <div className="mt-6 flex items-start gap-3 border border-[#d8ab4d]/30 bg-[#d8ab4d]/8 p-4" role="status"><Check className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><p className="text-sm leading-6 text-white/72">{successMessage}</p></div> : null}
           </form>
 
-          <aside className="space-y-5"><div className="border border-[#d8ab4d]/25 bg-[#15120c] p-6 sm:p-7 xl:sticky xl:top-32"><p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[#d8ab4d]">Booking summary</p><h2 className="mt-3 font-serif text-3xl">Your Royalties table</h2><div className="mt-7 space-y-4 border-y border-white/10 py-6 text-sm"><div className="flex items-start gap-3"><MapPin className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.outlet}</span></div><div className="flex items-start gap-3"><CalendarDays className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{selectedDate ? `${selectedDate.day}, ${selectedDate.number} ${selectedDate.month}` : "Select a date"}</span></div><div className="flex items-start gap-3"><Clock3 className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.time}</span></div><div className="flex items-start gap-3"><Users className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.guestCount}</span></div><div className="flex items-start gap-3"><PartyPopper className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.occasion}</span></div></div><p className="mt-5 text-xs leading-6 text-white/38">Reservation requests are now stored in the backend. Real-time slot locking and confirmation workflow can be layered on top when the admin reservation module is built.</p><div className="mt-6 flex items-center gap-3 border border-white/10 bg-black/20 p-4"><Phone className="size-4 text-[#d8ab4d]" /><div><p className="text-[0.56rem] font-black uppercase tracking-[0.12em] text-white/38">Need help?</p><p className="mt-1 text-sm text-white/72">Contact the restaurant team</p></div></div></div></aside>
+          <aside className="space-y-5"><div className="border border-[#d8ab4d]/25 bg-[#15120c] p-6 sm:p-7 xl:sticky xl:top-32"><p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[#d8ab4d]">Booking summary</p><h2 className="mt-3 font-serif text-3xl">Your Royalties table</h2><div className="mt-7 space-y-4 border-y border-white/10 py-6 text-sm"><div className="flex items-start gap-3"><MapPin className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.outlet || "No active outlet"}</span></div><div className="flex items-start gap-3"><CalendarDays className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{selectedDate ? `${selectedDate.day}, ${selectedDate.number} ${selectedDate.month}` : "Select a date"}</span></div><div className="flex items-start gap-3"><Clock3 className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.time}</span></div><div className="flex items-start gap-3"><Users className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.guestCount}</span></div><div className="flex items-start gap-3"><PartyPopper className="mt-0.5 size-4 shrink-0 text-[#d8ab4d]" /><span className="text-white/68">{form.occasion}</span></div></div><p className="mt-5 text-xs leading-6 text-white/38">Reservation requests are stored in the backend and outlet choices now follow the active Locations CMS records.</p><div className="mt-6 flex items-center gap-3 border border-white/10 bg-black/20 p-4"><Phone className="size-4 text-[#d8ab4d]" /><div><p className="text-[0.56rem] font-black uppercase tracking-[0.12em] text-white/38">Need help?</p><p className="mt-1 text-sm text-white/72">Contact the restaurant team</p></div></div></div></aside>
         </div>
       </section>
     </>
