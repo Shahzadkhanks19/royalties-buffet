@@ -11,8 +11,9 @@
     "build": "node scripts/generate-seo.mjs && vite build",
     "preview": "vite preview",
     "server": "node server/index.js",
-    "lint": "eslint .",
-    "check": "npm run lint && npm run build"
+    "audit:static": "node scripts/audit-static.mjs",
+    "lint": "eslint . --max-warnings=0",
+    "check": "npm run audit:static && npm run lint && npm run build"
   },
   "dependencies": {
     "express": "5.2.1",
