@@ -11,7 +11,7 @@ export function notFoundHandler(req, _res, next) {
   next(new ApiError(404, `API route not found: ${req.method} ${req.originalUrl}`));
 }
 
-export function errorHandler(error, _req, res, _next) {
+export function errorHandler(error, _req, res) {
   if (error?.name === "ValidationError") {
     const details = Object.values(error.errors || {}).map((item) => item.message);
     return res.status(400).json({ ok: false, message: "Validation failed.", details });
