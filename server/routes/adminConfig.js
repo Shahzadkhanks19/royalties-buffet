@@ -8,7 +8,6 @@ import SiteSettings from "../models/SiteSettings.js";
 import { cleanText, requireText } from "../utils/validation.js";
 
 const router = Router();
-router.use(requireAdmin);
 
 function ensureDatabase() {
   if (!databaseReady()) throw new ApiError(503, "Database is not connected yet.");
@@ -57,6 +56,8 @@ function settingsPayload(body = {}) {
     youtubeUrl: cleanText(body.youtubeUrl, 2000),
   };
 }
+
+router.use(requireAdmin);
 
 router.get("/settings", async (_req, res) => {
   ensureDatabase();
