@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const defaultDescription = "Royalties Buffet brings premium buffet dining, live counters, catering and franchise opportunities to Delhi NCR.";
+const configuredSiteUrl = (import.meta.env.VITE_SITE_URL || "").trim().replace(/\/+$/, "");
 
 const seoByPath = {
   "/": {
@@ -73,6 +74,10 @@ function upsertLink(rel, href) {
   element.setAttribute("href", href);
 }
 
+function removeLink(rel) {
+  document.head.querySelector(`link[rel="${rel}"]`)?.remove();
+}
+
 function upsertJsonLd(id, data) {
   let script = document.getElementById(id);
   if (!script) {
@@ -84,6 +89,10 @@ function upsertJsonLd(id, data) {
   script.textContent = JSON.stringify(data);
 }
 
+function removeJsonLd(id) {
+  document.getElementById(id)?.remove();
+}
+
 export default function SeoManager() {
   const { pathname } = useLocation();
 
@@ -93,10 +102,10 @@ export default function SeoManager() {
       title: "Page Not Found | Royalties Buffet",
       description: defaultDescription,
     };
-    const origin = window.location.origin;
-    const canonical = `${origin}${pathname === "/" ? "" : pathname}`;
-    const image = `${origin}/royalties-logo.png`;
-    const noIndex = !knownRoute || pathname === "/error";
+    const hasProductionUrl = Boolean(configuredSiteUrl);
+    const canonical = hasProductionUrl ? `${configuredSiteUrl}${pathname === "/" ? "" : pathname}` : "";
+    const image = hasProductionUrl ? `${configuredSiteUrl}/royalties-logo.png` : "";
+    const noIndex = !hasProductionUrl || !knownRoute || pathname === "/error";
 
     document.title = seo.title;
     upsertMeta('meta[name="description"]', { name: "description", content: seo.description });
@@ -104,12 +113,23 @@ export default function SeoManager() {
     upsertMeta('meta[property="og:title"]', { property: "og:title", content: seo.title });
     upsertMeta('meta[property="og:description"]', { property: "og:description", content: seo.description });
     upsertMeta('meta[property="og:type"]', { property: "og:type", content: "website" });
-    upsertMeta('meta[property="og:url"]', { property: "og:url", content: canonical });
-    upsertMeta('meta[property="og:image"]', { property: "og:image", content: image });
     upsertMeta('meta[property="og:site_name"]', { property: "og:site_name", content: "Royalties Buffet" });
     upsertMeta('meta[name="twitter:card"]', { name: "twitter:card", content: "summary_large_image" });
     upsertMeta('meta[name="twitter:title"]', { name: "twitter:title", content: seo.title });
     upsertMeta('meta[name="twitter:description"]', { name: "twitter:description", content: seo.description });
+
+    if (!hasProductionUrl) {
+      removeLink("canonical");
+      document.head.querySelector('meta[property="og:url"]')?.remove();
+      document.head.querySelector('meta[property="og:image"]')?.remove();
+      document.head.querySelector('meta[name="twitter:image"]')?.remove();
+      removeJsonLd("royalties-organization-schema");
+      removeJsonLd("royalties-restaurant-schema");
+      return;
+    }
+
+    upsertMeta('meta[property="og:url"]', { property: "og:url", content: canonical });
+    upsertMeta('meta[property="og:image"]', { property: "og:image", content: image });
     upsertMeta('meta[name="twitter:image"]', { name: "twitter:image", content: image });
     upsertLink("canonical", canonical);
 
@@ -117,7 +137,7 @@ export default function SeoManager() {
       "@context": "https://schema.org",
       "@type": "Organization",
       name: "Royalties Buffet",
-      url: origin,
+      url: configuredSiteUrl,
       logo: image,
       areaServed: "Delhi NCR",
       sameAs: [],
@@ -127,7 +147,7 @@ export default function SeoManager() {
       "@context": "https://schema.org",
       "@type": "Restaurant",
       name: "Royalties Buffet",
-      url: origin,
+      url: configuredSiteUrl,
       image,
       servesCuisine: ["Indian", "Italian", "Indo-Chinese", "Japanese", "Middle Eastern", "Mexican", "Continental"],
       areaServed: ["Gurugram", "Delhi", "Noida", "Delhi NCR"],
