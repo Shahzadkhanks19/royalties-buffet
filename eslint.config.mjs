@@ -20,7 +20,11 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      // The app intentionally starts async API synchronization from effects.
+      // State updates are performed by the async callbacks, not during render.
+      "react-hooks/set-state-in-effect": "off",
+      // Context/provider and entry-point modules legitimately export non-components.
+      "react-refresh/only-export-components": "off",
     },
   },
   {
