@@ -1,5 +1,6 @@
 export async function apiRequest(path, options = {}) {
   const response = await fetch(path, {
+    credentials: "include",
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     ...options,
   });
@@ -23,4 +24,12 @@ export async function apiRequest(path, options = {}) {
 
 export function postJson(path, body) {
   return apiRequest(path, { method: "POST", body: JSON.stringify(body) });
+}
+
+export function putJson(path, body) {
+  return apiRequest(path, { method: "PUT", body: JSON.stringify(body) });
+}
+
+export function deleteJson(path) {
+  return apiRequest(path, { method: "DELETE" });
 }
