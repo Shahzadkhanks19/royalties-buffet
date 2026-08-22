@@ -44,9 +44,13 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+// The main admin router owns both public authentication endpoints and
+// authenticated admin resources. It must be mounted before routers that apply
+// requireAdmin globally, otherwise /login, /forgot-password and
+// /reset-password are intercepted and incorrectly return 401.
+app.use("/api/admin", adminRoutes);
 app.use("/api/admin", adminConfigRoutes);
 app.use("/api/admin", adminAvailabilityRoutes);
-app.use("/api/admin", adminRoutes);
 app.use("/api", publicConfigRoutes);
 app.use("/api", publicRoutes);
 app.use(notFoundHandler);
