@@ -84,7 +84,7 @@ export default function ContactPage() {
             </div>
 
             <div className="relative min-h-[360px] overflow-hidden border border-white/10 bg-black">
-              <img src="https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1400&q=88" alt="Delhi NCR city atmosphere" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-55" />
+              <img src="https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=1400&q=88" alt="India Gate in New Delhi" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-55" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/5" />
               <div className="absolute inset-x-0 bottom-0 p-6"><p className="text-[0.58rem] font-black uppercase tracking-[0.15em] text-[#d8ab4d]">Reach us across NCR</p><h3 className="mt-2 font-serif text-3xl">One brand. Multiple ways to connect.</h3></div>
             </div>
