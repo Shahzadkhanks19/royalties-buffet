@@ -1,7 +1,9 @@
 import { BadgeCheck, Building2, CheckCircle2, MapPin, Rocket, Store, Users2 } from "lucide-react";
 import { useState } from "react";
 import CustomSelect from "../components/ui/CustomSelect";
+import SafeImage from "../components/ui/SafeImage";
 import { buttonGold, internalHero, internalHeroInner, shell } from "../config/site";
+import { fieldClass, textareaClass, validateCommonLeadFields } from "../utils/validation";
 
 const investmentBands = ["₹75L - ₹1Cr", "₹1Cr - ₹1.5Cr", "₹1.5Cr - ₹2Cr", "₹2Cr+"];
 const cityOptions = ["Gurugram", "Delhi", "Noida", "Greater Noida", "Faridabad", "Ghaziabad", "Other NCR / North India"];
@@ -17,21 +19,34 @@ const support = [
 
 const journey = ["Initial Enquiry", "Business Discussion", "Location Review", "Commercial Alignment", "Design & Setup", "Training & Launch"];
 
+function ErrorText({ message }) {
+  return message ? <span className="mt-2 block text-xs font-semibold text-red-300">{message}</span> : null;
+}
+
 export default function FranchisePage() {
   const [form, setForm] = useState({ city: "Gurugram", investment: "₹1Cr - ₹1.5Cr", experience: "Business Owner", site: "Actively searching", name: "", phone: "", email: "", company: "", message: "" });
+  const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+
+  const update = (key, value) => {
+    setForm((current) => ({ ...current, [key]: value }));
+    setErrors((current) => ({ ...current, [key]: undefined }));
+    setSubmitted(false);
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!form.name.trim() || !form.phone.trim()) return;
+    const nextErrors = validateCommonLeadFields({ name: form.name, phone: form.phone, email: form.email });
+    if (form.message.trim().length < 10) nextErrors.message = "Tell us a little more about your expansion plan.";
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) return;
     setSubmitted(true);
   };
 
   return (
     <>
       <section className={internalHero}>
-        <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=2200&q=90" alt="Premium restaurant interior" className="absolute inset-0 h-full w-full object-cover" />
+        <SafeImage src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=2200&q=90" alt="Premium restaurant interior" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,3,3,.97)_0%,rgba(3,3,3,.84)_43%,rgba(3,3,3,.34)_100%)]" />
         <div className={internalHeroInner}>
           <div className="max-w-3xl">
@@ -67,20 +82,20 @@ export default function FranchisePage() {
         <div className={`${shell} grid gap-8 xl:grid-cols-[.8fr_1.2fr]`}>
           <div><p className="text-[0.68rem] font-black uppercase tracking-[0.28em] text-[#d8ab4d]">Franchise enquiry</p><h2 className="mt-4 font-serif text-[clamp(3rem,5vw,5rem)] leading-[0.95] tracking-[-0.04em]">Tell us where you want to build.</h2><p className="mt-6 max-w-xl text-sm leading-7 text-white/48">Share your city, investment comfort and operating background. Commercials, territory, format and site feasibility can then be discussed in detail.</p><div className="mt-8 border border-[#d8ab4d]/25 bg-[#15120c] p-5"><MapPin className="size-5 text-[#d8ab4d]" /><p className="mt-3 text-sm leading-7 text-white/58">Primary expansion focus: Gurugram, Delhi, Noida and the wider Delhi NCR market.</p></div></div>
 
-          <form onSubmit={handleSubmit} className="border border-white/10 bg-[#0d0d0d] p-5 sm:p-7 lg:p-9">
+          <form onSubmit={handleSubmit} noValidate className="border border-white/10 bg-[#0d0d0d] p-5 sm:p-7 lg:p-9">
             <div className="grid gap-5 md:grid-cols-2">
               <CustomSelect label="Preferred City" value={form.city} options={cityOptions} icon={MapPin} onChange={(value) => update("city", value)} />
               <CustomSelect label="Investment Range" value={form.investment} options={investmentBands} icon={Building2} onChange={(value) => update("investment", value)} />
               <CustomSelect label="Your Background" value={form.experience} options={experienceOptions} icon={Users2} onChange={(value) => update("experience", value)} />
               <CustomSelect label="Site Status" value={form.site} options={siteOptions} icon={Store} onChange={(value) => update("site", value)} />
-              <label className="block"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Name</span><input value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="Your name" className="min-h-12 w-full border border-[#d8ab4d]/28 bg-black/55 px-4 text-sm text-white outline-none transition placeholder:text-white/28 focus:border-[#d8ab4d]/65" /></label>
-              <label className="block"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Phone</span><input value={form.phone} onChange={(event) => update("phone", event.target.value)} placeholder="10-digit mobile number" inputMode="numeric" className="min-h-12 w-full border border-[#d8ab4d]/28 bg-black/55 px-4 text-sm text-white outline-none transition placeholder:text-white/28 focus:border-[#d8ab4d]/65" /></label>
-              <label className="block"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Email</span><input value={form.email} onChange={(event) => update("email", event.target.value)} placeholder="you@example.com" className="min-h-12 w-full border border-[#d8ab4d]/28 bg-black/55 px-4 text-sm text-white outline-none transition placeholder:text-white/28 focus:border-[#d8ab4d]/65" /></label>
-              <label className="block"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Company / Business</span><input value={form.company} onChange={(event) => update("company", event.target.value)} placeholder="Optional" className="min-h-12 w-full border border-[#d8ab4d]/28 bg-black/55 px-4 text-sm text-white outline-none transition placeholder:text-white/28 focus:border-[#d8ab4d]/65" /></label>
-              <label className="block md:col-span-2"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Tell us about your plan</span><textarea value={form.message} onChange={(event) => update("message", event.target.value)} rows={5} placeholder="Target area, site size, timeline, operating plan or anything else we should know..." className="w-full resize-none border border-[#d8ab4d]/28 bg-black/55 px-4 py-3 text-sm leading-7 text-white outline-none transition placeholder:text-white/28 focus:border-[#d8ab4d]/65" /></label>
+              <label className="block"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Name</span><input value={form.name} onChange={(event) => update("name", event.target.value)} aria-invalid={Boolean(errors.name)} placeholder="Your name" autoComplete="name" className={fieldClass(errors.name)} /><ErrorText message={errors.name} /></label>
+              <label className="block"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Phone</span><input value={form.phone} onChange={(event) => update("phone", event.target.value.replace(/\D/g, "").slice(0, 10))} aria-invalid={Boolean(errors.phone)} placeholder="10-digit mobile number" inputMode="numeric" autoComplete="tel" className={fieldClass(errors.phone)} /><ErrorText message={errors.phone} /></label>
+              <label className="block"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Email</span><input value={form.email} onChange={(event) => update("email", event.target.value)} aria-invalid={Boolean(errors.email)} placeholder="you@example.com" inputMode="email" autoComplete="email" className={fieldClass(errors.email)} /><ErrorText message={errors.email} /></label>
+              <label className="block"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Company / Business</span><input value={form.company} onChange={(event) => update("company", event.target.value)} placeholder="Optional" className={fieldClass(false)} /></label>
+              <label className="block md:col-span-2"><span className="mb-2 block text-[0.58rem] font-black uppercase tracking-[0.14em] text-white/45">Tell us about your plan</span><textarea value={form.message} onChange={(event) => update("message", event.target.value)} aria-invalid={Boolean(errors.message)} rows={5} placeholder="Target area, site size, timeline, operating plan or anything else we should know..." className={textareaClass(errors.message)} /><ErrorText message={errors.message} /></label>
             </div>
-            <button type="submit" className={`${buttonGold} mt-7`}>Submit Franchise Interest</button>
-            {submitted ? <div className="mt-5 flex items-start gap-3 border border-[#d8ab4d]/30 bg-[#d8ab4d]/8 p-4"><CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[#d8ab4d]" /><p className="text-sm leading-6 text-white/70">Your franchise interest has been captured in the frontend flow. Backend lead storage and follow-up workflow will be connected later.</p></div> : null}
+            <button type="submit" className={`${buttonGold} mt-7 w-full sm:w-auto`}>Submit Franchise Interest</button>
+            {submitted ? <div className="mt-5 flex items-start gap-3 border border-[#d8ab4d]/30 bg-[#d8ab4d]/8 p-4" role="status"><CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[#d8ab4d]" /><p className="text-sm leading-6 text-white/70">Franchise details validated successfully and are ready for backend lead storage and follow-up.</p></div> : null}
           </form>
         </div>
       </section>
