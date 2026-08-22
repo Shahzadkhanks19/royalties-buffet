@@ -4,6 +4,7 @@ import { assertProductionEnv, env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/errors.js";
 import adminRoutes from "./routes/admin.js";
 import publicRoutes from "./routes/public.js";
+import { seedAdminAccount } from "./services/seedAdmin.js";
 import { seedCmsContent } from "./services/seedCms.js";
 
 const app = express();
@@ -51,6 +52,7 @@ async function start() {
 
   if (databaseReady()) {
     await seedCmsContent();
+    await seedAdminAccount();
   }
 
   app.listen(env.port, () => {
