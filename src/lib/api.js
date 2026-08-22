@@ -5,12 +5,7 @@ export async function apiRequest(path, options = {}) {
     ...options,
   });
 
-  let payload = null;
-  try {
-    payload = await response.json();
-  } catch {
-    payload = null;
-  }
+  const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
     const error = new Error(payload?.message || "Something went wrong. Please try again.");
