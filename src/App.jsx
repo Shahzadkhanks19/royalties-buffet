@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
+import AdminAvailabilityPage from "./admin/AdminAvailabilityPage";
 import AdminContentManager from "./admin/AdminContentManager";
 import AdminDashboardPage from "./admin/AdminDashboardPage";
 import AdminForgotPasswordPage from "./admin/AdminForgotPasswordPage";
@@ -38,49 +39,14 @@ export default function App() {
   const isAdmin = location.pathname.startsWith("/admin");
   const { showTop, scrollToTop } = useScrollPosition();
 
-  return (
-    <div className="min-h-screen bg-[#050505] font-sans antialiased">
-      {!isAdmin ? <SeoManager /> : null}
-      <RouteScrollManager />
-      {!isAdmin ? <SiteHeader /> : null}
-      <main>
-        <Suspense fallback={<PageSkeleton />}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/menu" element={<MenuPage />} />
-            <Route path="/reservation" element={<ReservationPage />} />
-            <Route path="/catering" element={<CateringPage />} />
-            <Route path="/franchise" element={<FranchisePage />} />
-            <Route path="/gallery" element={<GalleryPage />} />
-            <Route path="/locations" element={<LocationsPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/faq" element={<FaqPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/error" element={<ErrorPage />} />
-
-            <Route path="/admin/login" element={<AdminLoginPage />} />
-            <Route path="/admin/forgot-password" element={<AdminForgotPasswordPage />} />
-            <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
-            <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="reservations" element={<AdminLeadManager kind="reservations" />} />
-              <Route path="contacts" element={<AdminLeadManager kind="contacts" />} />
-              <Route path="catering" element={<AdminLeadManager kind="catering" />} />
-              <Route path="franchise" element={<AdminLeadManager kind="franchise" />} />
-              <Route path="menu" element={<AdminContentManager kind="menu" />} />
-              <Route path="gallery" element={<AdminContentManager kind="gallery" />} />
-              <Route path="locations" element={<AdminLocationsPage />} />
-              <Route path="settings" element={<AdminSettingsPage />} />
-            </Route>
-
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
-      </main>
-      {!isAdmin ? <SiteFooter /> : null}
-      {!isAdmin ? <ScrollTop visible={showTop} onScrollTop={scrollToTop} /> : null}
-    </div>
-  );
+  return <div className="min-h-screen bg-[#050505] font-sans antialiased">
+    {!isAdmin ? <SeoManager /> : null}<RouteScrollManager />{!isAdmin ? <SiteHeader /> : null}
+    <main><Suspense fallback={<PageSkeleton />}><Routes>
+      <Route path="/" element={<HomePage />} /><Route path="/about" element={<AboutPage />} /><Route path="/menu" element={<MenuPage />} /><Route path="/reservation" element={<ReservationPage />} /><Route path="/catering" element={<CateringPage />} /><Route path="/franchise" element={<FranchisePage />} /><Route path="/gallery" element={<GalleryPage />} /><Route path="/locations" element={<LocationsPage />} /><Route path="/contact" element={<ContactPage />} /><Route path="/faq" element={<FaqPage />} /><Route path="/privacy" element={<PrivacyPage />} /><Route path="/terms" element={<TermsPage />} /><Route path="/error" element={<ErrorPage />} />
+      <Route path="/admin/login" element={<AdminLoginPage />} /><Route path="/admin/forgot-password" element={<AdminForgotPasswordPage />} /><Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
+      <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}><Route index element={<AdminDashboardPage />} /><Route path="reservations" element={<AdminLeadManager kind="reservations" />} /><Route path="availability" element={<AdminAvailabilityPage />} /><Route path="contacts" element={<AdminLeadManager kind="contacts" />} /><Route path="catering" element={<AdminLeadManager kind="catering" />} /><Route path="franchise" element={<AdminLeadManager kind="franchise" />} /><Route path="menu" element={<AdminContentManager kind="menu" />} /><Route path="gallery" element={<AdminContentManager kind="gallery" />} /><Route path="locations" element={<AdminLocationsPage />} /><Route path="settings" element={<AdminSettingsPage />} /></Route>
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes></Suspense></main>
+    {!isAdmin ? <SiteFooter /> : null}{!isAdmin ? <ScrollTop visible={showTop} onScrollTop={scrollToTop} /> : null}
+  </div>;
 }
