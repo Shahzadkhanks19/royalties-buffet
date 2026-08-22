@@ -1,5 +1,10 @@
 import { lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
+import AdminContentManager from "./admin/AdminContentManager";
+import AdminDashboardPage from "./admin/AdminDashboardPage";
+import AdminLayout from "./admin/AdminLayout";
+import AdminLoginPage from "./admin/AdminLoginPage";
+import ProtectedAdminRoute from "./admin/ProtectedAdminRoute";
 import SiteFooter from "./components/layout/SiteFooter";
 import SiteHeader from "./components/layout/SiteHeader";
 import RouteScrollManager from "./components/routing/RouteScrollManager";
@@ -24,13 +29,15 @@ const ReservationPage = lazy(() => import("./pages/ReservationPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 
 export default function App() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith("/admin");
   const { showTop, scrollToTop } = useScrollPosition();
 
   return (
     <div className="min-h-screen bg-[#050505] font-sans antialiased">
-      <SeoManager />
+      {!isAdmin ? <SeoManager /> : null}
       <RouteScrollManager />
-      <SiteHeader />
+      {!isAdmin ? <SiteHeader /> : null}
       <main>
         <Suspense fallback={<PageSkeleton />}>
           <Routes>
@@ -47,12 +54,20 @@ export default function App() {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/error" element={<ErrorPage />} />
+
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="menu" element={<AdminContentManager kind="menu" />} />
+              <Route path="gallery" element={<AdminContentManager kind="gallery" />} />
+            </Route>
+
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </main>
-      <SiteFooter />
-      <ScrollTop visible={showTop} onScrollTop={scrollToTop} />
+      {!isAdmin ? <SiteFooter /> : null}
+      {!isAdmin ? <ScrollTop visible={showTop} onScrollTop={scrollToTop} /> : null}
     </div>
   );
 }
