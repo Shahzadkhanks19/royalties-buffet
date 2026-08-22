@@ -2,6 +2,7 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
+import { AdminAuthProvider } from "./admin/AdminAuthContext";
 import GlobalErrorBoundary from "./components/system/GlobalErrorBoundary";
 import Preloader from "./components/system/Preloader";
 import "./index.css";
@@ -18,7 +19,9 @@ function RoyaltiesApp() {
 
   return (
     <GlobalErrorBoundary>
-      <App />
+      <AdminAuthProvider>
+        <App />
+      </AdminAuthProvider>
     </GlobalErrorBoundary>
   );
 }
