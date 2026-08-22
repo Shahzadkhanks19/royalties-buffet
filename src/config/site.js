@@ -8,6 +8,7 @@ export const navItems = [
   ["Catering", "/catering"],
   ["Franchise", "/franchise"],
   ["Gallery", "/gallery"],
+  ["Locations", "/locations"],
   ["Contact", "/contact"],
 ];
 
